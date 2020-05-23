@@ -2,6 +2,8 @@ package projectpath
 
 import (
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -47,6 +49,17 @@ func TestExpandProjectPath(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Expand $HOME.
 			tt.want = os.ExpandEnv(tt.want)
+
+			// Use the correct filepath separator for windows & Unix.
+			//
+			// Its basically a noop on unix.
+			//
+			// But only fix want if ExpandProjectPth would actually do work.
+			if IsProjectPathPresent(tt.args.path) {
+				t.Log("name:", tt.name, "replacing:", tt.want)
+				tt.want = strings.ReplaceAll(tt.want, "/", string(filepath.Separator))
+				t.Log("name:", tt.name, "replaced:", tt.want)
+			}
 
 			if got := ExpandProjectPath(tt.args.path); got != tt.want {
 				t.Errorf("ExpandProjectPath() = %v, want %v", got, tt.want)

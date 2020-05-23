@@ -12,7 +12,7 @@ import (
 )
 
 func randomEnvVariableName() string {
-	return gomod.DirectCallerPackage() + "-" + uuid.New().String()
+	return gomod.DirectCallerPackagePanic() + "-" + uuid.New().String()
 }
 
 func TestGetenvRequired(t *testing.T) {

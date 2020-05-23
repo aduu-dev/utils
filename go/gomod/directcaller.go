@@ -9,15 +9,19 @@ import (
 	"golang.org/x/xerrors"
 )
 
-// DirectCallerPackageE is same as DirectCallerPackage but returns an error instead of panicing once an error occurs.
+// DirectCallerPackageE is same as DirectCallerPackagePanic but returns an error instead of panicing once an error occurs.
 func DirectCallerPackageE() (s string, err error) {
+	return directCallerPackageE(3)
+}
+
+func directCallerPackageE(depth int) (s string, err error) {
 	defer func() {
 		if err != nil {
 			err = xerrors.Errorf("determining current package failed: %w", err)
 		}
 	}()
 
-	currentDir := packagePathOfCaller(2)
+	currentDir := packagePathOfCaller(depth)
 
 	ws, err := GetWorkspaceFromWD()
 	if err != nil {
@@ -32,14 +36,18 @@ func DirectCallerPackageE() (s string, err error) {
 			"and so package name cannot be determined", currentDir, ws.GomodPath, ws.Module)
 	}
 
+	fmt.Println("currentDir:", currentDir, "gomodDir:", gomodDir)
+
 	// Add module path in front, then add current file with root removed.
-	return ws.Module + "/" + strings.TrimPrefix(currentDir, gomodDir+"/"), nil
+	return strings.ReplaceAll(
+		ws.Module + "/" + strings.TrimPrefix(strings.TrimSuffix(strings.TrimPrefix(currentDir, gomodDir), string(filepath.Separator)), string(filepath.Separator)),
+		string(filepath.Separator), "/"), nil
 }
 
-// DirectCallerPackage returns the package name the working directory currently points to.
+// DirectCallerPackagePanic returns the package name the working directory currently points to.
 // The function panics if working directory is not inside a workspace.
-func DirectCallerPackage() string {
-	pkg, err := DirectCallerPackageE()
+func DirectCallerPackagePanic() string {
+	pkg, err := directCallerPackageE(3)
 	if err != nil {
 		panic(err)
 	}

@@ -54,8 +54,6 @@ func Copy(exp expander.Expander, from string, to string) (err error) {
 		return ErrNotAbsolute
 	}
 
-	fmt.Println("before:", from, to)
-
 	from, err = filepath.EvalSymlinks(from)
 	if err != nil {
 		return
@@ -64,8 +62,6 @@ func Copy(exp expander.Expander, from string, to string) (err error) {
 	if err != nil {
 		return
 	}
-
-	fmt.Println("after:", from, to)
 
 	if err = copy.Copy(from, to); err != nil {
 		return err

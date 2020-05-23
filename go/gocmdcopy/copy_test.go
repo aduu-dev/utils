@@ -1,6 +1,7 @@
 package gocmdcopy
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -23,7 +24,7 @@ func TestCopy(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	wsPath, err := testWS.ExpandPath("//pkg/go/gocmdcopy/testdata")
+	wsPath, err := testWS.ExpandPath("//go/gocmdcopy/testdata")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,8 +38,13 @@ func TestCopy(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	existsAfter := []string{"a/a.go", "b/b.go", "a.go", "go.mod"}
-	sort.Strings(existsAfter)
+	wantAfter := []string{"a/a.go", "b/b.go", "a.go", "go.mod"}
+	sort.Strings(wantAfter)
+
+	// Adapt wanted file paths to the platform separator..
+	for i, p := range wantAfter {
+		wantAfter[i] = strings.ReplaceAll(p, "/", string(filepath.Separator))
+	}
 
 	var foundFiles []string
 	if err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
@@ -49,13 +55,15 @@ func TestCopy(t *testing.T) {
 			return nil
 		}
 
-		foundFiles = append(foundFiles, strings.TrimPrefix(strings.TrimPrefix(path, dir), "/"))
+		fmt.Println("Filepath separator:", string(filepath.Separator))
+		foundFiles = append(foundFiles, strings.TrimPrefix(strings.TrimPrefix(path, dir), string(filepath.Separator)))
 		return nil
 
 	}); err != nil {
 		t.Fatal(xerrors.Errorf("failed to retrieve copied over files from %s: %w", dir, err))
 	}
+
 	sort.Strings(foundFiles)
 
-	assert.Equal(t, existsAfter, foundFiles)
+	assert.Equal(t, wantAfter, foundFiles)
 }

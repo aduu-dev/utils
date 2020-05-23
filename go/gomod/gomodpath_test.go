@@ -1,6 +1,8 @@
 package gomod
 
 import (
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -9,20 +11,55 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 		path string
 	}
 
-	workspace := Workspace{
-		GomodPath: "/hello/world/go.mod",
-		Module:    "github.com/hello",
-	}
-
 	tests := []struct {
 		name      string
 		workspace Workspace
 		args      args
 		want      string
 		wantErr   bool
+		doNotExpandGomodPath bool
 	}{
+		// OK.
 		{
-			name: "error if GomodPath does not have /go.mod at the end",
+			name:      "test simple expanding",
+			workspace: Workspace{
+				GomodPath: "/hello/world/go.mod",
+				Module:    "github.com/hello",
+			},
+			args: args{
+				path: "//",
+			},
+			want:    "",
+			wantErr: false,
+		},
+		{
+			name:      "test expanding when not only //",
+			workspace: Workspace{
+				GomodPath: "/hello/world/go.mod",
+				Module:    "github.com/hello",
+			},
+			args: args{
+				path: "//abc",
+			},
+			want:    "/abc",
+			wantErr: false,
+		},
+		{
+			name: "do not care if Module stringis zero length",
+			workspace: Workspace{
+				GomodPath: "/abc/go.mod",
+				Module:    "",
+			},
+			args: args{
+				path: "//abc",
+			},
+			want:    "/abc",
+			wantErr: false,
+		},
+
+		// Errors.
+		{
+			name: "error if GomodPath does not have /go.mod suffix",
 			workspace: Workspace{
 				GomodPath: "/abc",
 				Module:    "",
@@ -34,31 +71,16 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "test error if not present",
-			workspace: workspace,
+			name:      "return error if not present",
+			workspace: Workspace{
+				GomodPath: "/hello/world/go.mod",
+				Module:    "github.com/hello",
+			},
 			args: args{
 				path: "",
 			},
 			want:    "",
 			wantErr: true,
-		},
-		{
-			name:      "test simple expanding",
-			workspace: workspace,
-			args: args{
-				path: "//",
-			},
-			want:    "/hello/world",
-			wantErr: false,
-		},
-		{
-			name:      "test expanding when not only //",
-			workspace: workspace,
-			args: args{
-				path: "//abc",
-			},
-			want:    "/hello/world/abc",
-			wantErr: false,
 		},
 		{
 			name: "test error if GomodPath is == /go.mod",
@@ -71,18 +93,7 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 			},
 			want:    "",
 			wantErr: true,
-		},
-		{
-			name: "do not care if Module stringis zero length",
-			workspace: Workspace{
-				GomodPath: "/abc/go.mod",
-				Module:    "",
-			},
-			args: args{
-				path: "//abc",
-			},
-			want:    "/abc/abc",
-			wantErr: false,
+			doNotExpandGomodPath: true,
 		},
 		{
 			name: "error out if GomodPath is not absolute length",
@@ -95,6 +106,7 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 			},
 			want:    "",
 			wantErr: true,
+			doNotExpandGomodPath: true,
 		},
 		{
 			name: "error if GomodPath has slash at the end",
@@ -107,6 +119,7 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 			},
 			want:    "",
 			wantErr: true,
+			doNotExpandGomodPath: true,
 		},
 		{
 			name: "error if path starts with more than two slashes at the beginning",
@@ -125,13 +138,32 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 		tt := tt2
 		t.Run(tt.name, func(t *testing.T) {
 			ws := tt.workspace
+
+			// If I choose a fixed ws.GomodPath here, then I can only make it fixed for one platform.
+			// So set it relative and filepath.Abs it here.
+
+			if !tt.doNotExpandGomodPath {
+				var err error
+				ws.GomodPath, err = filepath.Abs(strings.TrimPrefix(ws.GomodPath, "/"))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				// Expand want if there is no error.
+				if !tt.wantErr {
+					tt.want = filepath.Join(filepath.Dir(ws.GomodPath), strings.TrimPrefix(tt.want, "/"))
+				}
+			}
+
+			// Adapt want to include GomodPath if no error occured.
+
 			got, err := ws.ExpandPath(tt.args.path)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Workspace.ExpandPath() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("%#v.ExpandPath() error = %v, wantErr %v", ws, err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("Workspace.ExpandPath() = %v, want %v", got, tt.want)
+				t.Errorf("%#v.ExpandPath() =\n got: %v,\nwant: %v", ws, got, tt.want)
 			}
 		})
 	}
@@ -213,6 +245,15 @@ func TestWorkspace_ExpandPackage(t *testing.T) {
 				GomodPath: tt.fields.GomodPath,
 				Module:    tt.fields.Module,
 			}
+
+			// The pre-set GomodPath is not absolute on windows.
+			// Let's just expand it here, it is not used anyways.
+			var err error
+			ws.GomodPath, err = filepath.Abs(strings.TrimPrefix(ws.GomodPath, "/"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
 			gotS, err := ws.ExpandPackage(tt.args.path)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Workspace.ExpandPackage() error = %v, wantErr %v", err, tt.wantErr)
