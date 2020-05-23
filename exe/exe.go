@@ -1,5 +1,5 @@
 // Package exe enables template completion before command execution.
-package exe
+package exe // import "aduu.dev/utils/exe"
 
 import (
 	"context"

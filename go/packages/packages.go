@@ -1,5 +1,5 @@
 // Package packages includes methods to help dealing with go packages.
-package packages
+package packages // import "aduu.dev/utils/packages"
 
 import (
 	"fmt"

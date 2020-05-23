@@ -1,4 +1,4 @@
-package helper
+package helper // import "aduu.dev/utils/helper"
 
 import (
 	"fmt"

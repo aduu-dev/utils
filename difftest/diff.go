@@ -1,4 +1,4 @@
-package difftest
+package difftest // import "aduu.dev/utils/difftest"
 
 import (
 	"testing"

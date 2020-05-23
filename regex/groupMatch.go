@@ -1,5 +1,5 @@
 // Package regex contains regexp helper methods for group matches.
-package regex
+package regex // import "aduu.dev/utils/regex"
 
 import (
 	"regexp"
