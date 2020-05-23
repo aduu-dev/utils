@@ -14,8 +14,8 @@ import (
 )
 
 func deletePath(t *testing.T, path string) {
-	err := os.RemoveAll(path)
-	assert.NoError(t, err, "failed to delete temporary directory")
+	assert.NoError(t, os.Chdir(filepath.Dir(path)), "moving out of temp dir before deleting it to avoid an error on windows failed")
+	assert.NoError(t, os.RemoveAll(path), "failed to delete temporary directory")
 }
 
 func TestMoveFile(t *testing.T) {
@@ -36,7 +36,10 @@ func TestMoveFile(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tmp, err := ioutil.TempDir(os.TempDir(), "myprefix")
 			assert.NoError(t, err, "failed to create temp directory")
-			defer deletePath(t, tmp)
+
+			t.Cleanup(func() {
+				deletePath(t, tmp)
+			})
 
 			assert.NoError(t, os.Chdir(tmp), "failed to change to testing directory")
 

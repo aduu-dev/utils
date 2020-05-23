@@ -5,8 +5,6 @@ import (
 	"reflect"
 	"sort"
 	"testing"
-
-	"aduu.dev/utils/projectpath"
 )
 
 func TestListPackages(t *testing.T) {
@@ -31,7 +29,7 @@ func TestListPackages(t *testing.T) {
 	for _, tt2 := range tests {
 		tt := tt2
 		t.Run(tt.name, func(t *testing.T) {
-			tt.args.fromPath = filepath.Join(projectpath.ExpandProjectPath("//aduu.dev/pkg/go/packages/testdata/data"))
+			tt.args.fromPath = filepath.Join("testdata/data")
 			sort.Strings(tt.want)
 
 			got, err := ListPackages(tt.args.fromPath)

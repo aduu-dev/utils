@@ -30,14 +30,14 @@ func GetWorkspace(fromPath string) (ws Workspace, err error) {
 		return
 	}
 
-	gomodPath, moduleContent, err := modPathFrom(fromPath)
+	gomodPath, module, err := determineGomodPathAndModule(fromPath)
 	if err != nil {
 		return Workspace{}, err
 	}
 
 	return Workspace{
 		GomodPath: gomodPath,
-		Module:    moduleContent,
+		Module:    module,
 	}, nil
 }
 
@@ -74,10 +74,10 @@ func moduleString() []byte {
 
 // Source: https://github.com/golang/go/blob/master/src/cmd/go/internal/modfile/read.go#L837
 
-// modulePath returns the module path from the gomod file text.
+// determineModule returns the module path from the gomod file text.
 // If it cannot find a module path, it returns an empty string.
 // It is tolerant of unrelated problems in the go.mod file.
-func modulePath(mod []byte) string {
+func determineModule(mod []byte) string {
 	for len(mod) > 0 {
 		line := mod
 		mod = nil
@@ -111,16 +111,19 @@ func modulePath(mod []byte) string {
 	return "" // missing module path
 }
 
-// modPathFrom determines gomod path and modpath starting from the given path.
-func modPathFrom(from string) (string, string, error) {
-	gomodPath, err := findGoModFrom(from)
+// determineGomodPathAndModule determines gomod path and module starting from the given path.
+func determineGomodPathAndModule(from string) (gomodPath string, module string, err error) {
+	gomodPath, err = findGoModFrom(from)
 	if err != nil {
-		return "", "", fmt.Errorf("failed find go.mod-file starting from %s: %v", from, err)
+		return "", "", fmt.Errorf("failed find go.mod-file starting from %s: %w", from, err)
 	}
 
 	moduleContent, err := ioutil.ReadFile(gomodPath)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to read go.mod-file: %v", err)
 	}
-	return gomodPath, modulePath(moduleContent), nil
+
+	module = determineModule(moduleContent)
+
+	return
 }

@@ -37,6 +37,12 @@ func evalSymlinks(path string) (string, error) {
 
 // ListPackages lists all packages inside the given path and all sub-directories.
 func ListPackages(fromPath string) ([]string, error) {
+	// Make fromPath absolute so removal of prefix is simpler later.
+	fromPath, err := filepath.Abs(fromPath)
+	if err != nil {
+		return nil, err
+	}
+
 	ws, err := gomod.GetWorkspace(fromPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list packages: %v", err)
@@ -71,7 +77,9 @@ func ListPackages(fromPath string) ([]string, error) {
 			return filepath.SkipDir
 		}
 
-		trimmedPath := strings.TrimPrefix(strings.TrimPrefix(path, root), "/")
+		// Trim root and a path separator at the end.
+		trimmedPath := strings.TrimPrefix(strings.TrimPrefix(path, root), string(filepath.Separator))
+
 		var pkg string
 		if trimmedPath == "" {
 			pkg = ws.Module
