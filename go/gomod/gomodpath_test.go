@@ -12,16 +12,16 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 	}
 
 	tests := []struct {
-		name      string
-		workspace Workspace
-		args      args
-		want      string
-		wantErr   bool
+		name                 string
+		workspace            Workspace
+		args                 args
+		want                 string
+		wantErr              bool
 		doNotExpandGomodPath bool
 	}{
 		// OK.
 		{
-			name:      "test simple expanding",
+			name: "test simple expanding",
 			workspace: Workspace{
 				GomodPath: "/hello/world/go.mod",
 				Module:    "github.com/hello",
@@ -33,7 +33,7 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:      "test expanding when not only //",
+			name: "test expanding when not only //",
 			workspace: Workspace{
 				GomodPath: "/hello/world/go.mod",
 				Module:    "github.com/hello",
@@ -71,7 +71,7 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:      "return error if not present",
+			name: "return error if not present",
 			workspace: Workspace{
 				GomodPath: "/hello/world/go.mod",
 				Module:    "github.com/hello",
@@ -91,8 +91,8 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 			args: args{
 				path: "//abc",
 			},
-			want:    "",
-			wantErr: true,
+			want:                 "",
+			wantErr:              true,
 			doNotExpandGomodPath: true,
 		},
 		{
@@ -104,8 +104,8 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 			args: args{
 				path: "//abc",
 			},
-			want:    "",
-			wantErr: true,
+			want:                 "",
+			wantErr:              true,
 			doNotExpandGomodPath: true,
 		},
 		{
@@ -117,8 +117,8 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 			args: args{
 				path: "//abc",
 			},
-			want:    "",
-			wantErr: true,
+			want:                 "",
+			wantErr:              true,
 			doNotExpandGomodPath: true,
 		},
 		{

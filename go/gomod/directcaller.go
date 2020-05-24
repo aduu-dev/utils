@@ -40,7 +40,7 @@ func directCallerPackageE(depth int) (s string, err error) {
 
 	// Add module path in front, then add current file with root removed.
 	return strings.ReplaceAll(
-		ws.Module + "/" + strings.TrimPrefix(strings.TrimSuffix(strings.TrimPrefix(currentDir, gomodDir), string(filepath.Separator)), string(filepath.Separator)),
+		ws.Module+"/"+strings.TrimPrefix(strings.TrimSuffix(strings.TrimPrefix(currentDir, gomodDir), string(filepath.Separator)), string(filepath.Separator)),
 		string(filepath.Separator), "/"), nil
 }
 

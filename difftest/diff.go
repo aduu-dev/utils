@@ -21,4 +21,3 @@ func Diff(t *testing.T, got string, want string) {
 		t.Fatalf("%s() => err = %v", t.Name(), err)
 	}
 }
- 
