@@ -1,7 +1,14 @@
-on: [push]
+on:
+  push:
+    branches:
+      - master
+      - 'releases/**'
+    tags:
+      - v0.*.*
+      - v1.*.*
 name: Test
 jobs:
-  test:
+  test_branch:
     strategy:
       matrix:
         go-version: [1.14.x]

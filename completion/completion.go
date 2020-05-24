@@ -1,6 +1,6 @@
 // +build !main
 
-package completion // import "aduu.dev/pkg/completion"
+package completion // import "aduu.dev/utils/completion"
 
 import (
 	"bytes"
