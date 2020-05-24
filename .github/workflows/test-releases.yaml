@@ -1,11 +1,11 @@
 on:
   push:
     branches:
-      - master
+      - 'releases/**'
     tags:
       - v0.*.*
       - v1.*.*
-name: Test master
+name: Test releases
 jobs:
   test:
     strategy:
