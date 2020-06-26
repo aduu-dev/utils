@@ -49,7 +49,7 @@ func Install(sh shell.Shell) {
 
 // GenerateYumls walks the directory path and generates svgs from yuml files.
 //
-// The svg files are named the same as the yuml files with the suffix changed.
+// The svg files are named the same as the yuml files with the suffix replaced.
 func GenerateYumls(root string) (err error) {
 	klog.InfoS("Generate yumls",
 		"root", root)
