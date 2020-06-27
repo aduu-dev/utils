@@ -1,6 +1,8 @@
 package yuml2svg
 
 import (
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"aduu.dev/utils/shell"
@@ -57,6 +59,11 @@ func Test_GenerateYumls(t *testing.T) {
 		"cat testdata/a.yuml | yuml2svg --dark > testdata/a.svg",
 		"cat testdata/b.yuml | yuml2svg --dark > testdata/b.svg",
 		"cat testdata/folder/c.yuml | yuml2svg --dark > testdata/folder/c.svg"}
+
+	// Replace / with platform-specific separator.
+	for i, cmd := range want {
+		want[i] = strings.ReplaceAll(cmd, "/", string(filepath.Separator))
+	}
 
 	if !assert.Equal(t, want, got) {
 		t.Fail()
