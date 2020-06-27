@@ -1,4 +1,8 @@
-// Package yuml2svg generates yuml files using the yuml2svg Typescript package. Requires yarn to install yuml2svg globally.
+// Package yuml2svg generates yuml files using the yuml2svg Typescript package.
+//
+// Requires yarn to install yuml2svg globally.
+// For more infos: https://github.com/aduh95/yuml2svg#readme
+// For vscode snippets: https://github.com/aduh95/yuml2svg/blob/master/test/snippets.json
 package yuml2svg
 
 import (
