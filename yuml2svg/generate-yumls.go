@@ -57,7 +57,8 @@ func GenerateYuml(settings Settings, yumlPath string, toSvgPath string) (err err
 	svg := toSvgPath
 	klog.InfoS("Generating yuml",
 		"yuml-path", yumlPath,
-		"svg-path", svg)
+		"svg-path", svg,
+		"dark", settings.Dark)
 
 	darkModeOption := "--dark "
 	if !settings.Dark {
@@ -79,7 +80,8 @@ func Install(sh shell.Shell) {
 // The svg files are named the same as the yuml files with the suffix replaced.
 func GenerateYumls(settings Settings, root string) (err error) {
 	klog.InfoS("Generate yumls",
-		"root", root)
+		"root", root,
+		"dark", settings.Dark)
 
 	// If the user did not set a shell then use the built-in.
 	if settings.shell == nil {
