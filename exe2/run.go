@@ -3,8 +3,6 @@ package exe2
 import (
 	"os/exec"
 	"strings"
-	"sync"
-	"time"
 
 	"aduu.dev/utils/errors2"
 	"k8s.io/klog/v2"
@@ -15,84 +13,21 @@ func runWithSettings(cmd *exec.Cmd, setting *ExecuteSetting) (out string, err er
 		err = cleanup(err, cmd, setting)
 	}()
 
-	var timer *time.Timer
-	exited := false
-
-	// Wait in case we have a sync operation.
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-
-	// Run it in a goroutine to start the timeout timer after.
-	go func() {
-		switch {
-		case setting.start && setting.output:
-			panic("can't do start with output")
-		case setting.start && !setting.output:
-			err = cmd.Start()
-
-			// Do not wait for start.
-			wg.Done()
-		case !setting.start && setting.output:
-			var byteOut []byte
-			byteOut, err = cmd.Output()
-			if byteOut != nil {
-				out = strings.TrimSpace(string(byteOut))
-			}
-			wg.Done()
-		default:
-			err = cmd.Run()
-			wg.Done()
+	switch {
+	case setting.start && setting.output:
+		panic("can't do start with output")
+	case setting.start && !setting.output:
+		err = cmd.Start()
+	case !setting.start && setting.output:
+		var byteOut []byte
+		byteOut, err = cmd.Output()
+		if byteOut != nil {
+			out = strings.TrimSpace(string(byteOut))
 		}
-	}()
-
-	if setting.timeout != 0 {
-		timer = time.AfterFunc(setting.timeout, func() {
-			// Only call kill if we did not exit already.
-			klog.InfoS("State",
-				"isProcessNil", cmd.Process == nil,
-				"isProcessStateNil", cmd.ProcessState == nil)
-
-			// What if we did not start (cmd.ProcessState == nil)
-			// but the timeout triggered already?
-			//
-			// If we don't wait then sending the kill signal fails
-			// and we get a panic. Wait for 1s and kill it then when
-			// we are sure the process must have been started.
-			//
-			// Starting the timer after the cmd.Run/cmd.Start is
-			// superior though. Maybe run them in a Goroutine.
-			if cmd.ProcessState == nil {
-				_ = timer.Stop()
-
-				// Best effort.
-				timer = time.AfterFunc(time.Second, func() {
-					if !exited &&
-						cmd.Process != nil {
-						if timeoutErr := cmd.Process.Kill(); timeoutErr != nil {
-							klog.ErrorS(err, "Command timeout",
-								"args", cmd.Args)
-						}
-					}
-				})
-
-				return
-			}
-
-			if !exited {
-				if killErr := cmd.Process.Kill(); killErr != nil {
-					klog.ErrorS(err, "Kill error",
-						"args", cmd.Args)
-				}
-			}
-		})
+	default:
+		err = cmd.Run()
 	}
 
-	wg.Wait()
-
-	exited = true
-	if timer != nil {
-		timer.Stop()
-	}
 	return out, err
 }
 

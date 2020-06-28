@@ -97,6 +97,18 @@ func TestRunner_WithTimeout(t *testing.T) {
 	err := r.RunE(context.Background(),
 		TemplateSplitExpand(`sleep 1`, ""), WithTimeout(time.Millisecond*10))
 
+	gotErr := err.Error()
+	errSet := map[string]bool{
+		"signal: killed":            true,
+		"context deadline exceeded": true,
+	}
+
+	correctErr := errSet[gotErr]
+
+	if !correctErr {
+		t.Fatalf("Wrong err message:\n got            : %#v\nwant one of set: %#v", gotErr, errSet)
+	}
+
 	if !assert.EqualError(t, err, "signal: killed") {
 		t.Fail()
 	}
