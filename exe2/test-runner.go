@@ -1,0 +1,58 @@
+package exe2
+
+import "context"
+
+// NewTestRunner creates a new Test Runner.
+// It only stores commands inside its internal buffer.
+func NewTestRunner() *TestRunner {
+	return &TestRunner{}
+}
+
+// TestRunner is a runner which does not run anything,
+// but just stores given commands.
+type TestRunner struct {
+	commands [][]string
+}
+
+// Commands returns all commands executed with the runner.
+func (r *TestRunner) Commands() [][]string {
+	return r.commands
+}
+
+func (r *TestRunner) RunE(ctx context.Context, splitResult SplitResult, settings ...SettingsFunc) (err error) {
+	r.commands = append(r.commands, splitResult.command())
+
+	return nil
+}
+
+func (r *TestRunner) RunWithOutput(ctx context.Context, splitResult SplitResult, settings ...SettingsFunc) string {
+	r.commands = append(r.commands, splitResult.command())
+
+	return ""
+}
+
+/*
+func (r *TestRunner) Run(ctx context.Context, splitResult SplitResult, settings ...SettingsFunc) {
+	r.commands = append(r.commands, splitResult.command())
+}
+
+func (r *TestRunner) RunWithOutputE(ctx context.Context, splitResult SplitResult, settings ...SettingsFunc) (out string, err error) {
+	r.commands = append(r.commands, splitResult.command())
+
+	return "", nil
+}
+*/
+
+/*
+func (r *TestRunner) RunWithOutputCombined(ctx context.Context, splitResult SplitResult, settings ...SettingsFunc) string {
+	r.commands = append(r.commands, splitResult.command())
+
+	return ""
+}
+
+func (r *TestRunner) RunWithOutputCombinedE(ctx context.Context, splitResult SplitResult, settings ...SettingsFunc) (out string, err error) {
+	r.commands = append(r.commands, splitResult.command())
+
+	return "", nil
+}
+*/
