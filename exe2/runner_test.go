@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -93,6 +94,10 @@ func TestRunner_UsesWithDir(t *testing.T) {
 
 func TestRunner_WithTimeout(t *testing.T) {
 	r := NewRunner()
+
+	if runtime.GOOS == "windows" {
+		t.Skip("sleep/powershell sleep does not exist on windows runner")
+	}
 
 	err := r.RunE(context.Background(),
 		TemplateSplitExpand(SleepCommand("1"), ""), WithTimeout(time.Millisecond*10))
