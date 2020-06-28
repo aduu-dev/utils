@@ -95,7 +95,7 @@ func TestRunner_WithTimeout(t *testing.T) {
 	r := NewRunner()
 
 	err := r.RunE(context.Background(),
-		TemplateSplitExpand(`sleep 1`, ""), WithTimeout(time.Millisecond*10))
+		TemplateSplitExpand(SleepCommand("1"), ""), WithTimeout(time.Millisecond*10))
 
 	gotErr := err.Error()
 	errSet := map[string]bool{
@@ -110,7 +110,7 @@ func TestRunner_WithTimeout(t *testing.T) {
 	}
 
 	err = r.RunE(context.Background(),
-		TemplateSplitExpand(`sleep 0.01`, ""), WithTimeout(time.Second))
+		TemplateSplitExpand(SleepCommand("0.01"), ""), WithTimeout(time.Second))
 
 	if !assert.NoError(t, err) {
 		t.Fail()

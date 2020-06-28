@@ -40,7 +40,7 @@ func ExampleRunner_withTimeout() {
 	r := exe2.NewRunner()
 
 	err := r.RunE(context.Background(),
-		exe2.TemplateSplitExpand(`sleep 1`, ""),
+		exe2.TemplateSplitExpand(exe2.SleepCommand("1"), ""),
 		exe2.WithTimeout(time.Millisecond*10))
 
 	if err != nil {

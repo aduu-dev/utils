@@ -77,6 +77,22 @@ func Test_GenerateYumls(t *testing.T) {
 			cmd.Command[j] =
 				strings.ReplaceAll(arg, "/", string(filepath.Separator))
 		}
+
+		cmd.Setting.StdoutFile =
+			strings.ReplaceAll(
+				cmd.Setting.StdoutFile, "/", string(filepath.Separator),
+			)
+
+		cmd.Setting.StderrFile =
+			strings.ReplaceAll(
+				cmd.Setting.StderrFile, "/", string(filepath.Separator),
+			)
+
+		cmd.Setting.StdinFile =
+			strings.ReplaceAll(
+				cmd.Setting.StdinFile, "/", string(filepath.Separator),
+			)
+
 		want[i] = cmd
 	}
 
