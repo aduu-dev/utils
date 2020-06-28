@@ -1,6 +1,7 @@
 package exe2
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -95,9 +96,14 @@ func extractSettingsFromSlice(settings []SettingsFunc) ExecuteSetting {
 
 var (
 	errOutputAndStdoutFileOptsIncompatible = fmt.Errorf("err: setting stdout and returning output is incompatible")
+
+	errStartAndOutputIncompatible = fmt.Errorf("err: the flags start and output are incompatible")
 )
 
-func applySettings(cmd *exec.Cmd, setting *ExecuteSetting) (err error) {
+func createCommand(ctx context.Context,
+	splitResult SplitResult,
+	setting *ExecuteSetting,
+) (cmd *exec.Cmd, err error) {
 	defer func() {
 		if err != nil {
 			// Closing again because we encountered errors.
@@ -111,12 +117,22 @@ func applySettings(cmd *exec.Cmd, setting *ExecuteSetting) (err error) {
 		}
 	}()
 
+	if setting.timeout != 0 {
+		ctx, _ = context.WithTimeout(ctx, setting.timeout)
+	}
+
+	cmd = exec.CommandContext(ctx, splitResult.Name, splitResult.Args...)
+
+	if setting.start && setting.output {
+		return nil, errStartAndOutputIncompatible
+	}
+
 	if setting.dir != "" {
 		cmd.Dir = os.ExpandEnv(setting.dir)
 	}
 
 	if setting.output && len(setting.StdoutFile) != 0 {
-		return errOutputAndStdoutFileOptsIncompatible
+		return nil, errOutputAndStdoutFileOptsIncompatible
 	}
 
 	if len(setting.StdinFile) == 0 {
@@ -129,7 +145,7 @@ func applySettings(cmd *exec.Cmd, setting *ExecuteSetting) (err error) {
 		if err != nil {
 			klog.ErrorS(err, "Error opening stdin",
 				"file", setting.StdinFile)
-			return err
+			return nil, err
 		}
 
 		cmd.Stdin = stdin
@@ -146,7 +162,7 @@ func applySettings(cmd *exec.Cmd, setting *ExecuteSetting) (err error) {
 			if err != nil {
 				klog.ErrorS(err, "Error opening stdout",
 					"file", setting.StdoutFile)
-				return err
+				return nil, err
 			}
 
 			cmd.Stdout = stdout
@@ -163,7 +179,7 @@ func applySettings(cmd *exec.Cmd, setting *ExecuteSetting) (err error) {
 		if err != nil {
 			klog.ErrorS(err, "Error opening stderr",
 				"file", setting.StderrFile)
-			return err
+			return nil, err
 		}
 
 		cmd.Stderr = stderr
@@ -177,7 +193,7 @@ func applySettings(cmd *exec.Cmd, setting *ExecuteSetting) (err error) {
 		stderr, err := os.OpenFile(setting.StderrFile, os.O_CREATE|os.O_WRONLY, 0755)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		cmd.Stderr = stderr
@@ -185,7 +201,7 @@ func applySettings(cmd *exec.Cmd, setting *ExecuteSetting) (err error) {
 		setting.openFiles = append(setting.openFiles, stderr)
 	}
 
-	return
+	return cmd, nil
 }
 
 func defaultSettings() ExecuteSetting {

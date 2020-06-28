@@ -1,7 +1,6 @@
 package exe2
 
 import (
-	"fmt"
 	"os/exec"
 	"strings"
 	"time"
@@ -17,37 +16,65 @@ func runWithSettings(cmd *exec.Cmd, setting *ExecuteSetting) (out string, err er
 
 	var timer *time.Timer
 	exited := false
-	var errFromTimeout error
+
+	// Run it in a goroutine to start the timeout timer after.
+	go func() {
+		switch {
+		case setting.start && setting.output:
+			panic("can't do start with output")
+		case setting.start && !setting.output:
+			err = cmd.Start()
+		case !setting.start && setting.output:
+			var byteOut []byte
+			byteOut, err = cmd.Output()
+			if byteOut != nil {
+				out = strings.TrimSpace(string(byteOut))
+			}
+		default:
+			err = cmd.Run()
+		}
+	}()
 
 	if setting.timeout != 0 {
 		timer = time.AfterFunc(setting.timeout, func() {
+			// Only call kill if we did not exit already.
+			klog.InfoS("State",
+				"isProcessNil", cmd.Process == nil,
+				"isProcessStateNil", cmd.ProcessState == nil)
+
+			// What if we did not start (cmd.ProcessState == nil)
+			// but the timeout triggered already?
+			//
+			// If we don't wait then sending the kill signal fails
+			// and we get a panic. Wait for 1s and kill it then when
+			// we are sure the process must have been started.
+			//
+			// Starting the timer after the cmd.Run/cmd.Start is
+			// superior though. Maybe run them in a Goroutine.
+			if cmd.ProcessState == nil {
+				_ = timer.Stop()
+
+				// Best effort.
+				timer = time.AfterFunc(time.Second, func() {
+					if !exited &&
+						cmd.Process != nil {
+						if timeoutErr := cmd.Process.Kill(); timeoutErr != nil {
+							klog.ErrorS(err, "Command timeout",
+								"args", cmd.Args)
+						}
+					}
+				})
+
+				return
+			}
+
 			if !exited {
-				errFromTimeout = cmd.Process.Kill()
+				if killErr := cmd.Process.Kill(); killErr != nil {
+					klog.ErrorS(err, "Kill error",
+						"args", cmd.Args)
+				}
 			}
 		})
-	}
-
-	switch {
-	case setting.start && setting.output:
-		panic("can't do start with output")
-	case setting.start && !setting.output:
-		err = cmd.Start()
-	case !setting.start && setting.output:
-		var byteOut []byte
-		byteOut, err = cmd.Output()
-		if byteOut != nil {
-			out = strings.TrimSpace(string(byteOut))
-		}
-	default:
-		err = cmd.Run()
-	}
-
-	if errFromTimeout != nil {
-		if err != nil {
-			err = fmt.Errorf("error from timeout %v wraps err: %v", errFromTimeout, err)
-		} else {
-			err = fmt.Errorf("error from timeout: %v", errFromTimeout)
-		}
 	}
 
 	exited = true
