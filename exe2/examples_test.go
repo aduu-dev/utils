@@ -49,7 +49,13 @@ func ExampleRunner_withDeadline() {
 		panic("should time out")
 	}
 
-	fmt.Println(err)
+	// Make error message the same on all platforms.
+	errStr := err.Error()
+	if errStr == "signal: killed" {
+		errStr = "context deadline exceeded"
+	}
+
+	fmt.Println(errStr)
 	// Output: context deadline exceeded
 }
 
