@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"aduu.dev/utils/exe2"
@@ -38,6 +39,11 @@ func ExampleRunner_withDir() {
 
 func ExampleRunner_withDeadline() {
 	r := exe2.NewRunner()
+
+	// sleep does not exist on windows runner.
+	if runtime.GOOS == "windows" {
+		return
+	}
 
 	err := r.RunE(context.Background(),
 		exe2.TemplateSplitExpand(exe2.SleepCommand("1"), ""),
