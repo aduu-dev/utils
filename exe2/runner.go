@@ -62,7 +62,12 @@ func (r *runner) RunE(ctx context.Context, splitResult SplitResult,
 
 	setting := extractSettingsFromSlice(settings)
 
-	cmd, err := createCommand(ctx, splitResult, &setting)
+	cmd, cancel, err := createCommand(ctx, splitResult, &setting)
+
+	defer func() {
+		cancel()
+	}()
+
 	if err != nil {
 		return err
 	}
@@ -99,7 +104,11 @@ func (r *runner) RunWithOutputE(ctx context.Context, splitResult SplitResult,
 
 	setting := extractSettingsFromSlice(append(settings, withOutput))
 
-	cmd, err := createCommand(ctx, splitResult, &setting)
+	cmd, cancel, err := createCommand(ctx, splitResult, &setting)
+	defer func() {
+		cancel()
+	}()
+
 	if err != nil {
 		return "", err
 	}

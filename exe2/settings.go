@@ -103,7 +103,7 @@ var (
 func createCommand(ctx context.Context,
 	splitResult SplitResult,
 	setting *ExecuteSetting,
-) (cmd *exec.Cmd, err error) {
+) (cmd *exec.Cmd, cancel func(), err error) {
 	defer func() {
 		if err != nil {
 			// Closing again because we encountered errors.
@@ -117,14 +117,15 @@ func createCommand(ctx context.Context,
 		}
 	}()
 
+	cancel = func() {}
 	if setting.timeout != 0 {
-		ctx, _ = context.WithTimeout(ctx, setting.timeout)
+		ctx, cancel = context.WithTimeout(ctx, setting.timeout)
 	}
 
 	cmd = exec.CommandContext(ctx, splitResult.Name, splitResult.Args...)
 
 	if setting.start && setting.output {
-		return nil, errStartAndOutputIncompatible
+		return nil, cancel, errStartAndOutputIncompatible
 	}
 
 	if setting.dir != "" {
@@ -132,7 +133,7 @@ func createCommand(ctx context.Context,
 	}
 
 	if setting.output && len(setting.StdoutFile) != 0 {
-		return nil, errOutputAndStdoutFileOptsIncompatible
+		return nil, cancel, errOutputAndStdoutFileOptsIncompatible
 	}
 
 	if len(setting.StdinFile) == 0 {
@@ -145,7 +146,7 @@ func createCommand(ctx context.Context,
 		if err != nil {
 			klog.ErrorS(err, "Error opening stdin",
 				"file", setting.StdinFile)
-			return nil, err
+			return nil, cancel, err
 		}
 
 		cmd.Stdin = stdin
@@ -162,7 +163,7 @@ func createCommand(ctx context.Context,
 			if err != nil {
 				klog.ErrorS(err, "Error opening stdout",
 					"file", setting.StdoutFile)
-				return nil, err
+				return nil, cancel, err
 			}
 
 			cmd.Stdout = stdout
@@ -179,7 +180,7 @@ func createCommand(ctx context.Context,
 		if err != nil {
 			klog.ErrorS(err, "Error opening stderr",
 				"file", setting.StderrFile)
-			return nil, err
+			return nil, cancel, err
 		}
 
 		cmd.Stderr = stderr
@@ -193,7 +194,7 @@ func createCommand(ctx context.Context,
 		stderr, err := os.OpenFile(setting.StderrFile, os.O_CREATE|os.O_WRONLY, 0755)
 
 		if err != nil {
-			return nil, err
+			return nil, cancel, err
 		}
 
 		cmd.Stderr = stderr
@@ -201,7 +202,7 @@ func createCommand(ctx context.Context,
 		setting.openFiles = append(setting.openFiles, stderr)
 	}
 
-	return cmd, nil
+	return cmd, cancel, nil
 }
 
 func defaultSettings() ExecuteSetting {
