@@ -39,8 +39,6 @@ func ExampleRunner_withDir() {
 func ExampleRunner_withDeadline() {
 	r := exe2.NewRunner()
 
-	_ = 3
-
 	err := r.RunE(context.Background(),
 		exe2.TemplateSplitExpand(exe2.SleepCommand("1"), ""),
 		exe2.WithTimeout(time.Microsecond))
