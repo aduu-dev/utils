@@ -36,21 +36,25 @@ func ExampleRunner_withDir() {
 	}
 }
 
-func ExampleRunner_withTimeout() {
+func ExampleRunner_withDeadline() {
 	r := exe2.NewRunner()
+
+	_ = 3
 
 	err := r.RunE(context.Background(),
 		exe2.TemplateSplitExpand(exe2.SleepCommand("1"), ""),
-		exe2.WithTimeout(time.Millisecond*10))
+		exe2.WithTimeout(time.Microsecond))
 
-	if err != nil {
-		panic(err)
+	if err == nil {
+		panic("should time out")
 	}
+
+	fmt.Println(err)
+	// Output: context deadline exceeded
 }
 
 func ExampleRunner_withStdPipes() {
 	file1 := filepath.Join(os.TempDir(), "file1")
-	//file2 := filepath.Join(os.TempDir(), "file2")
 
 	r := exe2.NewRunner()
 
