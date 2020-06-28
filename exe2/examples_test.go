@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"aduu.dev/utils/exe2"
@@ -45,6 +46,29 @@ func ExampleRunner_withTimeout() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func ExampleRunner_withStdPipes() {
+	file1 := filepath.Join(os.TempDir(), "file1")
+	//file2 := filepath.Join(os.TempDir(), "file2")
+
+	r := exe2.NewRunner()
+
+	err := r.RunE(context.Background(),
+		exe2.TemplateSplitExpand("printf hi\n\n", ""),
+		exe2.WithStdoutFile(file1))
+	if err != nil {
+		panic(err)
+	}
+
+	err = r.RunE(context.Background(),
+		exe2.Split("cat"),
+		exe2.WithStdinFile(file1),
+	)
+	if err != nil {
+		panic(err)
+	}
+	// Output: hi
 }
 
 func ExampleRunner_RunE() {

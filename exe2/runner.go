@@ -3,6 +3,7 @@ package exe2
 import (
 	"context"
 	"os/exec"
+	"strings"
 
 	"k8s.io/klog/v2"
 )
@@ -58,12 +59,16 @@ func (r *runner) RunE(ctx context.Context, splitResult SplitResult,
 		return splitResult.Err
 	}
 
+	klog.InfoS("Executing", "command", strings.Join(splitResult.command(), " "))
+
 	cmd := exec.CommandContext(ctx, splitResult.Name, splitResult.Args...)
 
 	setting := extractSettingsFromSlice(settings)
-	applySettings(cmd, setting)
+	if err = applySettings(cmd, &setting); err != nil {
+		return err
+	}
 
-	_, err = runWithSettings(cmd, setting)
+	_, err = runWithSettings(cmd, &setting)
 	if err != nil {
 		klog.ErrorS(err, "Command failed",
 			"name", splitResult.Name,
@@ -96,9 +101,11 @@ func (r *runner) RunWithOutputE(ctx context.Context, splitResult SplitResult,
 	cmd := exec.CommandContext(ctx, splitResult.Name, splitResult.Args...)
 
 	setting := extractSettingsFromSlice(append(settings, withOutput))
-	applySettings(cmd, setting)
+	if err = applySettings(cmd, &setting); err != nil {
+		return "", err
+	}
 
-	out, err = runWithSettings(cmd, setting)
+	out, err = runWithSettings(cmd, &setting)
 	if err != nil {
 		klog.ErrorS(err, "Command failed",
 			"name", splitResult.Name,

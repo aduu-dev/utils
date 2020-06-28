@@ -6,11 +6,13 @@
 package yuml2svg
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"aduu.dev/utils/exe2"
 	"aduu.dev/utils/shell"
 	"k8s.io/klog/v2"
 )
@@ -26,9 +28,9 @@ type Settings struct {
 	// If Dark is false then the svg is rendered for light mode, edges are black.
 	Dark bool
 
-	// The shell to use. If it is not set a built-in shell is used.
-	// This option is here for running tests.
-	shell shell.Shell
+	// The runner to use. If it is not set a built-in runner is used.
+	// This option is here for use in tests to record commands.
+	r exe2.Runner
 }
 
 var (
@@ -45,6 +47,7 @@ func generateYumlInplace(settings Settings, yumlPath string) (err error) {
 	return GenerateYuml(settings, yumlPath, svg)
 }
 
+/*
 // GenerateYuml generates an svg from a given yuml file.
 func GenerateYuml(settings Settings, yumlPath string, toSvgPath string) (err error) {
 	if !strings.HasSuffix(yumlPath, yumlSuffix) {
@@ -69,6 +72,34 @@ func GenerateYuml(settings Settings, yumlPath string, toSvgPath string) (err err
 
 	return settings.shell.Err()
 }
+*/
+
+// GenerateYuml generates an svg from a given yuml file.
+func GenerateYuml(settings Settings, yumlPath string, toSvgPath string) (err error) {
+	if !strings.HasSuffix(yumlPath, yumlSuffix) {
+		klog.ErrorS(errNoYumlSuffix, "does not have a yuml suffix",
+			"yuml-path", yumlPath)
+
+		return fmt.Errorf("does not have yuml suffix")
+	}
+
+	svg := toSvgPath
+	klog.InfoS("Generating yuml",
+		"yuml-path", yumlPath,
+		"svg-path", svg,
+		"dark", settings.Dark)
+
+	return settings.r.RunE(context.Background(),
+		exe2.TemplateSplitExpand(`yuml2svg {{- if .Dark}} --dark{{end}}`,
+			struct {
+				Dark bool
+			}{
+				Dark: settings.Dark,
+			}),
+		exe2.WithStdinFile(yumlPath),
+		exe2.WithStdoutFile(svg),
+	)
+}
 
 // Install yuml2svg with yarn.
 func Install(sh shell.Shell) {
@@ -84,8 +115,8 @@ func GenerateYumls(settings Settings, root string) (err error) {
 		"dark", settings.Dark)
 
 	// If the user did not set a shell then use the built-in.
-	if settings.shell == nil {
-		settings.shell = shell.New()
+	if settings.r == nil {
+		settings.r = exe2.NewRunner()
 	}
 
 	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {

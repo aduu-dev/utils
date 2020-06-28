@@ -14,6 +14,11 @@ type SplitResult struct {
 	Err error
 }
 
+// Split just splits the argument and returns the result.
+func Split(arg string) SplitResult {
+	return splitCommand(arg)
+}
+
 func (result *SplitResult) command() []string {
 	return append([]string{result.Name}, result.Args...)
 }

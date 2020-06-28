@@ -11,24 +11,41 @@ func NewTestRunner() *TestRunner {
 // TestRunner is a runner which does not run anything,
 // but just stores given commands.
 type TestRunner struct {
-	commands [][]string
+	commands []Command
+}
+
+// Command is a test struct which stores a call.
+// Options which are added by the Run-method itself are omitted.
+type Command struct {
+	Command []string
+	Setting ExecuteSetting
 }
 
 // Commands returns all commands executed with the runner.
-func (r *TestRunner) Commands() [][]string {
+func (r *TestRunner) Commands() []Command {
 	return r.commands
 }
 
 func (r *TestRunner) RunE(ctx context.Context, splitResult SplitResult, settings ...SettingsFunc) (err error) {
-	r.commands = append(r.commands, splitResult.command())
+	setting := extractSettingsFromSlice(settings)
+
+	r.commands = append(r.commands, Command{
+		Command: splitResult.command(),
+		Setting: setting,
+	})
 
 	return nil
 }
 
-func (r *TestRunner) RunWithOutput(ctx context.Context, splitResult SplitResult, settings ...SettingsFunc) string {
-	r.commands = append(r.commands, splitResult.command())
+func (r *TestRunner) RunWithOutputE(ctx context.Context, splitResult SplitResult, settings ...SettingsFunc) (string, error) {
+	setting := extractSettingsFromSlice(settings)
 
-	return ""
+	r.commands = append(r.commands, Command{
+		Command: splitResult.command(),
+		Setting: setting,
+	})
+
+	return "", nil
 }
 
 /*

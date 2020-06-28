@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"aduu.dev/utils/shell"
+	"aduu.dev/utils/exe2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,36 +33,51 @@ func Test_svgPath(t *testing.T) {
 	}
 }
 
-var _ shell.Shell = &testShell{}
-
-type testShell struct {
-	executedCommands []string
-}
-
-func (sh *testShell) RunScript(script string) {
-	sh.executedCommands = append(sh.executedCommands, script)
-}
-
-func (sh *testShell) Err() error {
-	return nil
-}
-
 func Test_GenerateYumls(t *testing.T) {
 	root := "./testdata"
 
-	sh := &testShell{}
-	assert.NoError(t, GenerateYumls(Settings{Dark: true, shell: sh}, root))
+	r := exe2.NewTestRunner()
+	assert.NoError(t, GenerateYumls(Settings{Dark: true, r: r}, root))
 
-	got := sh.executedCommands
-	want := []string{
-		"cat testdata/.hidden-folder/d.yuml | yuml2svg --dark > testdata/.hidden-folder/d.svg",
-		"cat testdata/a.yuml | yuml2svg --dark > testdata/a.svg",
-		"cat testdata/b.yuml | yuml2svg --dark > testdata/b.svg",
-		"cat testdata/folder/c.yuml | yuml2svg --dark > testdata/folder/c.svg"}
+	got := r.Commands()
+	want := []exe2.Command{
+		{
+			Command: []string{"yuml2svg", "--dark"},
+			Setting: exe2.ExecuteSetting{
+				StdinFile:  "testdata/.hidden-folder/d.yuml",
+				StdoutFile: "testdata/.hidden-folder/d.svg",
+			},
+		},
+		{
+			Command: []string{"yuml2svg", "--dark"},
+			Setting: exe2.ExecuteSetting{
+				StdinFile:  "testdata/a.yuml",
+				StdoutFile: "testdata/a.svg",
+			},
+		},
+		{
+			Command: []string{"yuml2svg", "--dark"},
+			Setting: exe2.ExecuteSetting{
+				StdinFile:  "testdata/b.yuml",
+				StdoutFile: "testdata/b.svg",
+			},
+		},
+		{
+			Command: []string{"yuml2svg", "--dark"},
+			Setting: exe2.ExecuteSetting{
+				StdinFile:  "testdata/folder/c.yuml",
+				StdoutFile: "testdata/folder/c.svg",
+			},
+		},
+	}
 
 	// Replace / with platform-specific separator.
 	for i, cmd := range want {
-		want[i] = strings.ReplaceAll(cmd, "/", string(filepath.Separator))
+		for j, arg := range cmd.Command {
+			cmd.Command[j] =
+				strings.ReplaceAll(arg, "/", string(filepath.Separator))
+		}
+		want[i] = cmd
 	}
 
 	if !assert.Equal(t, want, got) {
@@ -78,10 +93,10 @@ func TestGenerateYuml(t *testing.T) {
 	}
 
 	tests := []struct {
-		name         string
-		args         args
-		wantCommands []string
-		wantErr      bool
+		name        string
+		args        args
+		wantCommand exe2.Command
+		wantErr     bool
 	}{
 		{
 			name: "dark mode",
@@ -90,8 +105,12 @@ func TestGenerateYuml(t *testing.T) {
 				yumlPath:  "a.yuml",
 				toSvgPath: "b.svg",
 			},
-			wantCommands: []string{
-				"cat a.yuml | yuml2svg --dark > b.svg",
+			wantCommand: exe2.Command{
+				Command: []string{"yuml2svg", "--dark"},
+				Setting: exe2.ExecuteSetting{
+					StdinFile:  "a.yuml",
+					StdoutFile: "b.svg",
+				},
 			},
 			wantErr: false,
 		},
@@ -102,23 +121,27 @@ func TestGenerateYuml(t *testing.T) {
 				yumlPath:  "a.yuml",
 				toSvgPath: "b.svg",
 			},
-			wantCommands: []string{
-				"cat a.yuml | yuml2svg > b.svg",
+			wantCommand: exe2.Command{
+				Command: []string{"yuml2svg"},
+				Setting: exe2.ExecuteSetting{
+					StdinFile:  "a.yuml",
+					StdoutFile: "b.svg",
+				},
 			},
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sh := &testShell{}
-			tt.args.settings.shell = sh
+			r := exe2.NewTestRunner()
+			tt.args.settings.r = r
 
 			if err := GenerateYuml(tt.args.settings, tt.args.yumlPath, tt.args.toSvgPath); (err != nil) != tt.wantErr {
 				t.Errorf("GenerateYuml() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			got := sh.executedCommands
-			want := tt.wantCommands
+			got := r.Commands()
+			want := []exe2.Command{tt.wantCommand}
 
 			if !assert.Equal(t, want, got) {
 				t.Fail()

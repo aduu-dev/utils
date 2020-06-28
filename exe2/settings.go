@@ -1,9 +1,13 @@
 package exe2
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"time"
+
+	"aduu.dev/utils/errors2"
+	"k8s.io/klog/v2"
 )
 
 // SettingsFunc is a function which modifies the execution setting.
@@ -13,9 +17,16 @@ type SettingsFunc func(s *ExecuteSetting)
 type ExecuteSetting struct {
 	dir     string
 	start   bool
-	output  bool
 	timeout time.Duration
 	//executeAstemplate bool
+
+	// stdin/stdout:
+	output     bool
+	StdinFile  string
+	StdoutFile string
+	StderrFile string
+
+	openFiles []*os.File
 }
 
 // WithStart sets the command to run async.
@@ -42,6 +53,29 @@ func WithTimeout(duration time.Duration) SettingsFunc {
 	}
 }
 
+// WithStdinFile opens the given file for reading with Stdin.
+func WithStdinFile(path string) SettingsFunc {
+	return func(s *ExecuteSetting) {
+		s.StdinFile = path
+	}
+}
+
+// WithStdoutFile opens the given file for writing with Stdout.
+// Does not append.
+func WithStdoutFile(path string) SettingsFunc {
+	return func(s *ExecuteSetting) {
+		s.StdoutFile = path
+	}
+}
+
+// WithStderrFile opens the given file for writing with Stderr.
+// Does not append.
+func WithStderrFile(path string) SettingsFunc {
+	return func(s *ExecuteSetting) {
+		s.StdoutFile = path
+	}
+}
+
 /*
 // WithoutTemplateExecution does
 func WithoutTemplateExecution(s *ExecuteSetting) {
@@ -59,19 +93,99 @@ func extractSettingsFromSlice(settings []SettingsFunc) ExecuteSetting {
 	return setting
 }
 
-func applySettings(cmd *exec.Cmd, setting ExecuteSetting) {
+var (
+	errOutputAndStdoutFileOptsIncompatible = fmt.Errorf("err: setting stdout and returning output is incompatible")
+)
+
+func applySettings(cmd *exec.Cmd, setting *ExecuteSetting) (err error) {
+	defer func() {
+		if err != nil {
+			// Closing again because we encountered errors.
+			for _, reader := range setting.openFiles {
+				if closeErr := reader.Close(); closeErr != nil {
+					err = errors2.CombineErrors(err, closeErr)
+				}
+			}
+
+			err = fmt.Errorf("failed to apply settings: %w", err)
+		}
+	}()
+
 	if setting.dir != "" {
 		cmd.Dir = os.ExpandEnv(setting.dir)
 	}
 
-	if setting.output {
-		cmd.Stderr = os.Stderr
+	if setting.output && len(setting.StdoutFile) != 0 {
+		return errOutputAndStdoutFileOptsIncompatible
+	}
+
+	if len(setting.StdinFile) == 0 {
+		klog.V(5).InfoS("No stdin file to open")
 		cmd.Stdin = os.Stdin
 	} else {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
+		klog.V(5).InfoS("Opening stdin file")
+		stdin, err := os.OpenFile(setting.StdinFile, os.O_RDWR, 0755)
+
+		if err != nil {
+			klog.ErrorS(err, "Error opening stdin",
+				"file", setting.StdinFile)
+			return err
+		}
+
+		cmd.Stdin = stdin
+		klog.V(5).InfoS("Add stdin to open files")
+		setting.openFiles = append(setting.openFiles, stdin)
 	}
+
+	if !setting.output {
+		if len(setting.StdoutFile) == 0 {
+			cmd.Stdout = os.Stdout
+		} else {
+			stdout, err := os.OpenFile(setting.StdoutFile, os.O_CREATE|os.O_WRONLY, 0755)
+
+			if err != nil {
+				klog.ErrorS(err, "Error opening stdout",
+					"file", setting.StdoutFile)
+				return err
+			}
+
+			cmd.Stdout = stdout
+
+			setting.openFiles = append(setting.openFiles, stdout)
+		}
+	}
+
+	if len(setting.StderrFile) == 0 {
+		cmd.Stderr = os.Stderr
+	} else {
+		stderr, err := os.OpenFile(setting.StderrFile, os.O_CREATE|os.O_WRONLY, 0755)
+
+		if err != nil {
+			klog.ErrorS(err, "Error opening stderr",
+				"file", setting.StderrFile)
+			return err
+		}
+
+		cmd.Stderr = stderr
+
+		setting.openFiles = append(setting.openFiles, stderr)
+	}
+
+	if len(setting.StderrFile) == 0 {
+		cmd.Stderr = os.Stderr
+	} else {
+		stderr, err := os.OpenFile(setting.StderrFile, os.O_CREATE|os.O_WRONLY, 0755)
+
+		if err != nil {
+			return err
+		}
+
+		cmd.Stderr = stderr
+
+		setting.openFiles = append(setting.openFiles, stderr)
+	}
+
+	return
 }
 
 func defaultSettings() ExecuteSetting {

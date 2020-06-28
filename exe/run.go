@@ -1,20 +1,13 @@
-package exe2
+package exe
 
 import (
 	"fmt"
 	"os/exec"
 	"strings"
 	"time"
-
-	"aduu.dev/utils/errors2"
-	"k8s.io/klog/v2"
 )
 
-func runWithSettings(cmd *exec.Cmd, setting *ExecuteSetting) (out string, err error) {
-	defer func() {
-		err = cleanup(err, cmd, setting)
-	}()
-
+func runWithSettings(cmd *exec.Cmd, setting ExecuteSetting) (out string, err error) {
 	var timer *time.Timer
 	exited := false
 	var errFromTimeout error
@@ -55,19 +48,4 @@ func runWithSettings(cmd *exec.Cmd, setting *ExecuteSetting) (out string, err er
 		timer.Stop()
 	}
 	return out, err
-}
-
-func cleanup(err error, cmd *exec.Cmd, setting *ExecuteSetting) error {
-	klog.V(5).InfoS("Files to close", "count", len(setting.openFiles))
-
-	// Closing file-pipes if used.
-	for _, file := range setting.openFiles {
-		klog.V(5).InfoS("Closing file",
-			"name", file.Name())
-		if closeErr := file.Close(); closeErr != nil {
-			err = errors2.CombineErrors(err, closeErr)
-		}
-	}
-
-	return err
 }
