@@ -3,6 +3,7 @@ package exe2
 import (
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
 
 	"aduu.dev/utils/errors2"
@@ -17,6 +18,10 @@ func runWithSettings(cmd *exec.Cmd, setting *ExecuteSetting) (out string, err er
 	var timer *time.Timer
 	exited := false
 
+	// Wait in case we have a sync operation.
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
 	// Run it in a goroutine to start the timeout timer after.
 	go func() {
 		switch {
@@ -24,14 +29,19 @@ func runWithSettings(cmd *exec.Cmd, setting *ExecuteSetting) (out string, err er
 			panic("can't do start with output")
 		case setting.start && !setting.output:
 			err = cmd.Start()
+
+			// Do not wait for start.
+			wg.Done()
 		case !setting.start && setting.output:
 			var byteOut []byte
 			byteOut, err = cmd.Output()
 			if byteOut != nil {
 				out = strings.TrimSpace(string(byteOut))
 			}
+			wg.Done()
 		default:
 			err = cmd.Run()
+			wg.Done()
 		}
 	}()
 
@@ -76,6 +86,8 @@ func runWithSettings(cmd *exec.Cmd, setting *ExecuteSetting) (out string, err er
 			}
 		})
 	}
+
+	wg.Wait()
 
 	exited = true
 	if timer != nil {

@@ -11,6 +11,7 @@ import (
 	"aduu.dev/utils/helper"
 	"aduu.dev/utils/helper/testhelper"
 	"github.com/stretchr/testify/assert"
+	"k8s.io/klog/v2"
 )
 
 func TestRunner_MethodsReturnErrorIfSplitFailed(t *testing.T) {
@@ -58,7 +59,11 @@ func TestRunner_MethodsReturnErrorIfSplitFailed(t *testing.T) {
 
 func TestRunner_UsesWithDir(t *testing.T) {
 	tempDir := testhelper.MakeTempDir(t, "execute_UseWithDir")
-	defer testhelper.DeleteTempDir(t, tempDir)
+	defer func() {
+		klog.InfoS("Deleting temp dir",
+			"tempdir", tempDir)
+		testhelper.DeleteTempDir(t, tempDir)
+	}()
 
 	// Creating a so i can try to touch a/b and so won't create a if it did not switch directories correctly
 	a := filepath.Join(tempDir, "a")
@@ -70,6 +75,7 @@ func TestRunner_UsesWithDir(t *testing.T) {
 
 	r := NewRunner()
 
+	klog.InfoS("Starting RunE")
 	err := r.RunE(context.Background(),
 		TemplateSplitExpand(`touch a/b`, ""), WithDir(tempDir))
 
