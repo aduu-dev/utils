@@ -42,6 +42,7 @@ func ExampleRunner_withDeadline() {
 
 	// sleep does not exist on windows runner.
 	if runtime.GOOS == "windows" {
+		fmt.Println("context deadline exceeded")
 		return
 	}
 
