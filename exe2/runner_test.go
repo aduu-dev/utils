@@ -109,10 +109,6 @@ func TestRunner_WithTimeout(t *testing.T) {
 		t.Fatalf("Wrong err message:\n got            : %#v\nwant one of set: %#v", gotErr, errSet)
 	}
 
-	if !assert.EqualError(t, err, "signal: killed") {
-		t.Fail()
-	}
-
 	err = r.RunE(context.Background(),
 		TemplateSplitExpand(`sleep 0.01`, ""), WithTimeout(time.Second))
 
