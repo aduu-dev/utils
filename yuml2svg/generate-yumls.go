@@ -41,7 +41,9 @@ func svgPath(yumlPath string) string {
 	return strings.TrimSuffix(yumlPath, yumlSuffix) + svgSuffix
 }
 
-func generateYumlInplace(settings Settings, yumlPath string) (err error) {
+// GenerateYumlInplace generates an svg from the given yuml.
+// The name is the source name with the extension exchanged with svg.
+func GenerateYumlInplace(settings Settings, yumlPath string) (err error) {
 	svg := svgPath(yumlPath)
 
 	return GenerateYuml(settings, yumlPath, svg)
@@ -128,7 +130,7 @@ func GenerateYumls(settings Settings, root string) (err error) {
 			return nil
 		}
 
-		return generateYumlInplace(settings, path)
+		return GenerateYumlInplace(settings, path)
 	})
 
 	if err != nil {
