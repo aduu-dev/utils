@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	"aduu.dev/utils/exe2"
-	"aduu.dev/utils/shell"
 	"k8s.io/klog/v2"
 )
 
@@ -49,33 +48,6 @@ func GenerateYumlInplace(settings Settings, yumlPath string) (err error) {
 	return GenerateYuml(settings, yumlPath, svg)
 }
 
-/*
-// GenerateYuml generates an svg from a given yuml file.
-func GenerateYuml(settings Settings, yumlPath string, toSvgPath string) (err error) {
-	if !strings.HasSuffix(yumlPath, yumlSuffix) {
-		klog.ErrorS(errNoYumlSuffix, "does not have a yuml suffix",
-			"yuml-path", yumlPath)
-
-		return fmt.Errorf("does not have yuml suffix")
-	}
-
-	svg := toSvgPath
-	klog.InfoS("Generating yuml",
-		"yuml-path", yumlPath,
-		"svg-path", svg,
-		"dark", settings.Dark)
-
-	darkModeOption := "--dark "
-	if !settings.Dark {
-		darkModeOption = ""
-	}
-
-	settings.shell.RunScript(fmt.Sprintf(`cat %s | yuml2svg %s> %s`, yumlPath, darkModeOption, svg))
-
-	return settings.shell.Err()
-}
-*/
-
 // GenerateYuml generates an svg from a given yuml file.
 func GenerateYuml(settings Settings, yumlPath string, toSvgPath string) (err error) {
 	if !strings.HasSuffix(yumlPath, yumlSuffix) {
@@ -104,8 +76,9 @@ func GenerateYuml(settings Settings, yumlPath string, toSvgPath string) (err err
 }
 
 // Install yuml2svg with yarn.
-func Install(sh shell.Shell) {
-	sh.RunScript(`yarn global add yuml2svg`)
+func Install(r exe2.Runner) (err error) {
+	return r.RunE(context.Background(),
+		exe2.TemplateSplitExpand(`yarn global add yuml2svg`, ""))
 }
 
 // GenerateYumls walks the directory path and generates svgs from yuml files.
@@ -116,7 +89,7 @@ func GenerateYumls(settings Settings, root string) (err error) {
 		"root", root,
 		"dark", settings.Dark)
 
-	// If the user did not set a shell then use the built-in.
+	// If the user did not set a runner then use the built-in.
 	if settings.r == nil {
 		settings.r = exe2.NewRunner()
 	}
