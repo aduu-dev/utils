@@ -2,6 +2,8 @@ package dash
 
 import "context"
 
+var _ Runner = NewTestRunner()
+
 // NewTestRunner creates a new Test Runner.
 // It only stores commands inside its internal buffer.
 func NewTestRunner() *TestRunner {
@@ -26,7 +28,7 @@ func (r *TestRunner) Commands() []Command {
 	return r.commands
 }
 
-func (r *TestRunner) RunE(ctx context.Context, splitResult SplitResult, settings ...SettingsFunc) (err error) {
+func (r *TestRunner) RunE(ctx context.Context, splitResult *SplitResult, settings ...SettingsFunc) (err error) {
 	setting := extractSettingsFromSlice(settings)
 
 	r.commands = append(r.commands, Command{
@@ -37,7 +39,7 @@ func (r *TestRunner) RunE(ctx context.Context, splitResult SplitResult, settings
 	return nil
 }
 
-func (r *TestRunner) RunWithOutputE(ctx context.Context, splitResult SplitResult, settings ...SettingsFunc) (string, error) {
+func (r *TestRunner) RunWithOutputE(ctx context.Context, splitResult *SplitResult, settings ...SettingsFunc) (string, error) {
 	setting := extractSettingsFromSlice(settings)
 
 	r.commands = append(r.commands, Command{

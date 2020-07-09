@@ -33,7 +33,7 @@ func Test_TemplateSplitExpand(t *testing.T) {
 		t.Fail()
 	}
 
-	want := SplitResult{Name: "echo", Args: []string{key}}
+	want := &SplitResult{Name: "echo", Args: []string{key}}
 
 	if !assert.Equal(t, want, got) {
 		t.Fail()

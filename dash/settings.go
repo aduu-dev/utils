@@ -101,7 +101,7 @@ var (
 )
 
 func createCommand(ctx context.Context,
-	splitResult SplitResult,
+	splitResult *SplitResult,
 	setting *ExecuteSetting,
 ) (cmd *exec.Cmd, cancel func(), err error) {
 	defer func() {

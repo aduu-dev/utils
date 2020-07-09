@@ -22,10 +22,10 @@ func TestRunner_MethodsReturnErrorIfSplitFailed(t *testing.T) {
 
 	args := struct {
 		ctx         context.Context
-		splitResult SplitResult
+		splitResult *SplitResult
 	}{
 		ctx:         context.Background(),
-		splitResult: SplitResult{Err: errors.New("some-error")},
+		splitResult: &SplitResult{Err: errors.New("some-error")},
 	}
 
 	tests := []struct {

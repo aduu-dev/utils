@@ -10,10 +10,10 @@ import (
 // Runner combines all run functions into one interface.
 type Runner interface {
 	RunE(ctx context.Context,
-		splitResult SplitResult,
+		splitResult *SplitResult,
 		settings ...SettingsFunc) (err error)
 	RunWithOutputE(ctx context.Context,
-		splitResult SplitResult,
+		splitResult *SplitResult,
 		settings ...SettingsFunc) (out string, err error)
 
 	/*
@@ -51,7 +51,7 @@ func (r *runner) Run(ctx context.Context, splitResult SplitResult,
 }
 */
 
-func (r *runner) RunE(ctx context.Context, splitResult SplitResult,
+func (r *runner) RunE(ctx context.Context, splitResult *SplitResult,
 	settings ...SettingsFunc) (err error) {
 	// Check the arguments were parsed without error.
 	if splitResult.Err != nil {
@@ -95,7 +95,7 @@ func (r *runner) RunWithOutput(ctx context.Context, splitResult SplitResult,
 }
 */
 
-func (r *runner) RunWithOutputE(ctx context.Context, splitResult SplitResult,
+func (r *runner) RunWithOutputE(ctx context.Context, splitResult *SplitResult,
 	settings ...SettingsFunc) (out string, err error) {
 	// Check the arguments were parsed without error.
 	if splitResult.Err != nil {
