@@ -44,7 +44,7 @@ func connectLocalPortToRemotePort(
 	con *localConnection) (err error,
 ) {
 	return d.RunE(ctx,
-		dash.SplitTemplateExpand(`ssh -L {{.LocalPort}}:{{.RemoteAdress}}:{{.RemotePort}} {{.SSHName}}`, con))
+		dash.SplitTemplateExpand(`ssh -L {{.LocalPort}}:{{.RemoteAdress}}:{{.RemotePort}} {{.SSHName}} -N`, con))
 }
 
 func connectRemotePortToLocalPort(
@@ -53,59 +53,63 @@ func connectRemotePortToLocalPort(
 	con *localConnection) (err error,
 ) {
 	return d.RunE(ctx,
-		dash.SplitTemplateExpand(`ssh -R {{.RemotePort}}:{{.RemoteAdress}}:{{.LocalPort}} {{.SSHName}}`, con))
+		dash.SplitTemplateExpand(`ssh -R {{.RemotePort}}:{{.RemoteAdress}}:{{.LocalPort}} {{.SSHName}} -N`, con))
 }
 
 // ConnectLocalPortToRemotePort starts a service which connects
 // the local host with the remote host on the given ports.
-func ConnectLocalPortToRemotePort(m *runmanager.RunManager,
+func ConnectLocalPortToRemotePort(
 	localPort string,
 	remoteAdress string,
 	remotePort string,
 	sshName string,
-) {
-	con, err := newLocalConnection(localPort,
-		remoteAdress, remotePort,
-		sshName)
+) runmanager.Service {
+	return func(m *runmanager.RunManager) {
+		con, err := newLocalConnection(localPort,
+			remoteAdress, remotePort,
+			sshName)
 
-	if err != nil {
-		m.ErrChan <- err
+		if err != nil {
+			m.ErrChan <- err
+		}
+
+		m.Run(&runmanager.Runner{
+			Run: func() error {
+				return connectLocalPortToRemotePort(m.Context, dash.NewRunner(), con)
+			},
+			Shutdown: func() error {
+				klog.InfoS("Shutting down local-to-remote-port connection")
+				return nil
+			},
+		})
 	}
-
-	m.Run(&runmanager.Runner{
-		Run: func() error {
-			return connectLocalPortToRemotePort(m.Context, dash.NewRunner(), con)
-		},
-		Shutdown: func() error {
-			klog.InfoS("Shutting down local-to-remote-port connection")
-			return nil
-		},
-	})
 }
 
 // ConnectLocalPortToRemotePort starts a service which connects
 // the remote host with the local host on the given ports.
-func ConnectRemotePortToLocalPort(m *runmanager.RunManager,
+func ConnectRemotePortToLocalPort(
 	remoteAdress string,
 	remotePort string,
 	localPort string,
 	sshName string,
-) {
-	con, err := newLocalConnection(localPort,
-		remoteAdress, remotePort,
-		sshName)
+) runmanager.Service {
+	return func(m *runmanager.RunManager) {
+		con, err := newLocalConnection(localPort,
+			remoteAdress, remotePort,
+			sshName)
 
-	if err != nil {
-		m.ErrChan <- err
+		if err != nil {
+			m.ErrChan <- err
+		}
+
+		m.Run(&runmanager.Runner{
+			Run: func() error {
+				return connectRemotePortToLocalPort(m.Context, dash.NewRunner(), con)
+			},
+			Shutdown: func() error {
+				klog.InfoS("Shutting down local-to-remote-port connection")
+				return nil
+			},
+		})
 	}
-
-	m.Run(&runmanager.Runner{
-		Run: func() error {
-			return connectRemotePortToLocalPort(m.Context, dash.NewRunner(), con)
-		},
-		Shutdown: func() error {
-			klog.InfoS("Shutting down local-to-remote-port connection")
-			return nil
-		},
-	})
 }

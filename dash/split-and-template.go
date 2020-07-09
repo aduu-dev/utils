@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"os"
 	"text/template"
-
-	"k8s.io/klog/v2"
 )
 
 // TemplateSplitExpand executes the template with obj,
@@ -92,8 +90,6 @@ func (s *SplitResult) template(obj interface{}) *SplitResult {
 // template templates s with obj into buf.
 func templateString(s string, obj interface{}, buf *bytes.Buffer) (err error) {
 	buf.Reset()
-
-	klog.InfoS("string before templating", "string", s)
 
 	// Execute template.
 	t, err := template.New("").Parse(s)
