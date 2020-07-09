@@ -1,4 +1,4 @@
-package exe2_test
+package dash_test
 
 import (
 	"context"
@@ -8,15 +8,15 @@ import (
 	"runtime"
 	"time"
 
-	"aduu.dev/utils/exe2"
+	"aduu.dev/utils/dash"
 )
 
 func ExampleRunner_RunWithOutputE() {
-	r := exe2.NewRunner()
+	r := dash.NewRunner()
 
 	out, err := r.RunWithOutputE(
 		context.Background(),
-		exe2.TemplateSplitExpand(`echo hi`, ""))
+		dash.TemplateSplitExpand(`echo hi`, ""))
 	if err != nil {
 		panic(err)
 	}
@@ -26,11 +26,11 @@ func ExampleRunner_RunWithOutputE() {
 }
 
 func ExampleRunner_withDir() {
-	r := exe2.NewRunner()
+	r := dash.NewRunner()
 
 	err := r.RunE(context.Background(),
-		exe2.TemplateSplitExpand(`ls`, ""),
-		exe2.WithDir(os.Getenv("HOME")),
+		dash.TemplateSplitExpand(`ls`, ""),
+		dash.WithDir(os.Getenv("HOME")),
 	)
 	if err != nil {
 		panic(err)
@@ -38,7 +38,7 @@ func ExampleRunner_withDir() {
 }
 
 func ExampleRunner_withDeadline() {
-	r := exe2.NewRunner()
+	r := dash.NewRunner()
 
 	// sleep does not exist on windows runner.
 	if runtime.GOOS == "windows" {
@@ -47,8 +47,8 @@ func ExampleRunner_withDeadline() {
 	}
 
 	err := r.RunE(context.Background(),
-		exe2.TemplateSplitExpand(exe2.SleepCommand("1"), ""),
-		exe2.WithTimeout(time.Microsecond))
+		dash.TemplateSplitExpand(dash.SleepCommand("1"), ""),
+		dash.WithTimeout(time.Microsecond))
 
 	if err == nil {
 		panic("should time out")
@@ -67,18 +67,18 @@ func ExampleRunner_withDeadline() {
 func ExampleRunner_withStdPipes() {
 	file1 := filepath.Join(os.TempDir(), "file1")
 
-	r := exe2.NewRunner()
+	r := dash.NewRunner()
 
 	err := r.RunE(context.Background(),
-		exe2.TemplateSplitExpand("printf hi\n\n", ""),
-		exe2.WithStdoutFile(file1))
+		dash.TemplateSplitExpand("printf hi\n\n", ""),
+		dash.WithStdoutFile(file1))
 	if err != nil {
 		panic(err)
 	}
 
 	err = r.RunE(context.Background(),
-		exe2.Split("cat"),
-		exe2.WithStdinFile(file1),
+		dash.Split("cat"),
+		dash.WithStdinFile(file1),
 	)
 	if err != nil {
 		panic(err)
@@ -87,10 +87,10 @@ func ExampleRunner_withStdPipes() {
 }
 
 func ExampleRunner_RunE() {
-	r := exe2.NewRunner()
+	r := dash.NewRunner()
 
 	err := r.RunE(context.Background(),
-		exe2.TemplateSplitExpand(`ls {{.Dir}}`, struct{ Dir string }{
+		dash.TemplateSplitExpand(`ls {{.Dir}}`, struct{ Dir string }{
 			Dir: "$HOME",
 		}))
 

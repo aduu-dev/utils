@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"aduu.dev/utils/exe2"
+	"aduu.dev/utils/dash"
 	"k8s.io/klog/v2"
 )
 
@@ -29,7 +29,7 @@ type Settings struct {
 
 	// The runner to use. If it is not set a built-in runner is used.
 	// This option is here for use in tests to record commands.
-	r exe2.Runner
+	r dash.Runner
 }
 
 var (
@@ -64,21 +64,21 @@ func GenerateYuml(settings Settings, yumlPath string, toSvgPath string) (err err
 		"dark", settings.Dark)
 
 	return settings.r.RunE(context.Background(),
-		exe2.TemplateSplitExpand(`yuml2svg {{- if .Dark}} --dark{{end}}`,
+		dash.TemplateSplitExpand(`yuml2svg {{- if .Dark}} --dark{{end}}`,
 			struct {
 				Dark bool
 			}{
 				Dark: settings.Dark,
 			}),
-		exe2.WithStdinFile(yumlPath),
-		exe2.WithStdoutFile(svg),
+		dash.WithStdinFile(yumlPath),
+		dash.WithStdoutFile(svg),
 	)
 }
 
 // Install yuml2svg with yarn.
-func Install(r exe2.Runner) (err error) {
+func Install(r dash.Runner) (err error) {
 	return r.RunE(context.Background(),
-		exe2.TemplateSplitExpand(`yarn global add yuml2svg`, ""))
+		dash.TemplateSplitExpand(`yarn global add yuml2svg`, ""))
 }
 
 // GenerateYumls walks the directory path and generates svgs from yuml files.
@@ -91,7 +91,7 @@ func GenerateYumls(settings Settings, root string) (err error) {
 
 	// If the user did not set a runner then use the built-in.
 	if settings.r == nil {
-		settings.r = exe2.NewRunner()
+		settings.r = dash.NewRunner()
 	}
 
 	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {

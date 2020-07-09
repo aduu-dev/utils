@@ -1,4 +1,4 @@
-package exe2
+package dash
 
 import (
 	"context"
@@ -101,6 +101,8 @@ func (r *runner) RunWithOutputE(ctx context.Context, splitResult SplitResult,
 	if splitResult.Err != nil {
 		return "", splitResult.Err
 	}
+
+	klog.InfoS("Executing", "command", strings.Join(splitResult.command(), " "))
 
 	setting := extractSettingsFromSlice(append(settings, withOutput))
 

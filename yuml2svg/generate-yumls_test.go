@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"aduu.dev/utils/exe2"
+	"aduu.dev/utils/dash"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,35 +36,35 @@ func Test_svgPath(t *testing.T) {
 func Test_GenerateYumls(t *testing.T) {
 	root := "./testdata"
 
-	r := exe2.NewTestRunner()
+	r := dash.NewTestRunner()
 	assert.NoError(t, GenerateYumls(Settings{Dark: true, r: r}, root))
 
 	got := r.Commands()
-	want := []exe2.Command{
+	want := []dash.Command{
 		{
 			Command: []string{"yuml2svg", "--dark"},
-			Setting: exe2.ExecuteSetting{
+			Setting: dash.ExecuteSetting{
 				StdinFile:  "testdata/.hidden-folder/d.yuml",
 				StdoutFile: "testdata/.hidden-folder/d.svg",
 			},
 		},
 		{
 			Command: []string{"yuml2svg", "--dark"},
-			Setting: exe2.ExecuteSetting{
+			Setting: dash.ExecuteSetting{
 				StdinFile:  "testdata/a.yuml",
 				StdoutFile: "testdata/a.svg",
 			},
 		},
 		{
 			Command: []string{"yuml2svg", "--dark"},
-			Setting: exe2.ExecuteSetting{
+			Setting: dash.ExecuteSetting{
 				StdinFile:  "testdata/b.yuml",
 				StdoutFile: "testdata/b.svg",
 			},
 		},
 		{
 			Command: []string{"yuml2svg", "--dark"},
-			Setting: exe2.ExecuteSetting{
+			Setting: dash.ExecuteSetting{
 				StdinFile:  "testdata/folder/c.yuml",
 				StdoutFile: "testdata/folder/c.svg",
 			},
@@ -111,7 +111,7 @@ func TestGenerateYuml(t *testing.T) {
 	tests := []struct {
 		name        string
 		args        args
-		wantCommand exe2.Command
+		wantCommand dash.Command
 		wantErr     bool
 	}{
 		{
@@ -121,9 +121,9 @@ func TestGenerateYuml(t *testing.T) {
 				yumlPath:  "a.yuml",
 				toSvgPath: "b.svg",
 			},
-			wantCommand: exe2.Command{
+			wantCommand: dash.Command{
 				Command: []string{"yuml2svg", "--dark"},
-				Setting: exe2.ExecuteSetting{
+				Setting: dash.ExecuteSetting{
 					StdinFile:  "a.yuml",
 					StdoutFile: "b.svg",
 				},
@@ -137,9 +137,9 @@ func TestGenerateYuml(t *testing.T) {
 				yumlPath:  "a.yuml",
 				toSvgPath: "b.svg",
 			},
-			wantCommand: exe2.Command{
+			wantCommand: dash.Command{
 				Command: []string{"yuml2svg"},
-				Setting: exe2.ExecuteSetting{
+				Setting: dash.ExecuteSetting{
 					StdinFile:  "a.yuml",
 					StdoutFile: "b.svg",
 				},
@@ -149,7 +149,7 @@ func TestGenerateYuml(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := exe2.NewTestRunner()
+			r := dash.NewTestRunner()
 			tt.args.settings.r = r
 
 			if err := GenerateYuml(tt.args.settings, tt.args.yumlPath, tt.args.toSvgPath); (err != nil) != tt.wantErr {
@@ -157,7 +157,7 @@ func TestGenerateYuml(t *testing.T) {
 			}
 
 			got := r.Commands()
-			want := []exe2.Command{tt.wantCommand}
+			want := []dash.Command{tt.wantCommand}
 
 			if !assert.Equal(t, want, got) {
 				t.Fail()
