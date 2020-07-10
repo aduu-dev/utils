@@ -34,7 +34,7 @@ func Test_connectLocalPortToRemotePort(t *testing.T) {
 			want: []string{
 				"ssh",
 				"-L",
-				"8080:127.0.0.1:9090",
+				"127.0.0.1:8080:127.0.0.1:9090",
 				"dev1",
 				"-N",
 			},
@@ -54,7 +54,7 @@ func Test_connectLocalPortToRemotePort(t *testing.T) {
 			want: []string{
 				"ssh",
 				"-L",
-				"8080 def:127.0.0.1:9090",
+				"127.0.0.1:8080 def:127.0.0.1:9090",
 				"dev1",
 				"-N",
 			},
@@ -115,7 +115,7 @@ func Test_connectRemotePortToLocalPort(t *testing.T) {
 			want: []string{
 				"ssh",
 				"-R",
-				"9090:127.0.0.1:8080",
+				"127.0.0.1:9090:127.0.0.1:8080",
 				"dev1",
 				"-N",
 			},
@@ -135,7 +135,7 @@ func Test_connectRemotePortToLocalPort(t *testing.T) {
 			want: []string{
 				"ssh",
 				"-R",
-				"9090:127.0.0.1:8080 def",
+				"127.0.0.1:9090:127.0.0.1:8080 def",
 				"dev1",
 				"-N",
 			},

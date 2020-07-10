@@ -44,7 +44,7 @@ func connectLocalPortToRemotePort(
 	con *localConnection) (err error,
 ) {
 	return d.RunE(ctx,
-		dash.SplitTemplateExpand(`ssh -L {{.LocalPort}}:{{.RemoteAdress}}:{{.RemotePort}} {{.SSHName}} -N`, con))
+		dash.SplitTemplateExpand(`ssh -L 127.0.0.1:{{.LocalPort}}:{{.RemoteAdress}}:{{.RemotePort}} {{.SSHName}} -N`, con))
 }
 
 func connectRemotePortToLocalPort(
@@ -53,7 +53,7 @@ func connectRemotePortToLocalPort(
 	con *localConnection) (err error,
 ) {
 	return d.RunE(ctx,
-		dash.SplitTemplateExpand(`ssh -R {{.RemotePort}}:{{.RemoteAdress}}:{{.LocalPort}} {{.SSHName}} -N`, con))
+		dash.SplitTemplateExpand(`ssh -R 127.0.0.1:{{.RemotePort}}:{{.RemoteAdress}}:{{.LocalPort}} {{.SSHName}} -N`, con))
 }
 
 // ConnectLocalPortToRemotePort starts a service which connects
