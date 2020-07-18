@@ -1,5 +1,4 @@
-
-[![PkgGoDev](https://pkg.go.dev/badge/aduu.dev/utils?tab=doc)](https://pkg.go.dev/aduu.dev/utils?tab=doc)
+[![PkgGoDev](https://pkg.go.dev/badge/aduu.dev/utils?tab=doc)](https://pkg.go.dev/mod/aduu.dev/utils?tab=doc)
 
 # Abstract
 
