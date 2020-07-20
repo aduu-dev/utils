@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "combinetwo.go",
+        "common_errors.go",
+        "iserror.go",
+    ],
+    importpath = "aduu.dev/utils/errors2",
+    visibility = ["//visibility:public"],
+    deps = ["@org_golang_x_xerrors//:go_default_library"],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["iserror_test.go"],
+    embed = [":go_default_library"],
+)

@@ -6,6 +6,7 @@ require (
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/google/uuid v1.1.1
+	github.com/googlecodelabs/tools v2.2.0+incompatible // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.9.0
 	github.com/improbable-eng/grpc-web v0.12.0
 	github.com/jmoiron/sqlx v1.2.0

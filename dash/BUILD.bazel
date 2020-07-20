@@ -1,0 +1,40 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "doc.go",
+        "run.go",
+        "runner.go",
+        "settings.go",
+        "sleep.go",
+        "split.go",
+        "split-and-template.go",
+        "test-runner.go",
+    ],
+    importpath = "aduu.dev/utils/dash",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//errors2:go_default_library",
+        "@io_k8s_klog_v2//:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = [
+        "examples_test.go",
+        "runner_test.go",
+        "split-and-template_test.go",
+        "split_test.go",
+    ],
+    embed = [":go_default_library"],
+    deps = [
+        "//helper:go_default_library",
+        "//helper/testhelper:go_default_library",
+        "@com_github_google_uuid//:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
+        "@io_k8s_klog_v2//:go_default_library",
+        "@tools_gotest//assert:go_default_library",
+    ],
+)

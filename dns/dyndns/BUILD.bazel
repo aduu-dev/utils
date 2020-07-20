@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["dyndns.go"],
+    importpath = "aduu.dev/utils/dns/dyndns",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["dyndns_test.go"],
+    embed = [":go_default_library"],
+    deps = ["//dns/dyndns/services:go_default_library"],
+)

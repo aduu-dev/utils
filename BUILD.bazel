@@ -1,10 +1,37 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 load("@bazel_gazelle//:def.bzl", "gazelle")
 
 go_binary(
     name="hello",
-    srcs=["hello.go"],
+    embed=[":go_default_library"],
+    visibility=["//visibility:public"],
 )
 
-# gazelle:prefix github.com/example/project
+# gazelle:prefix aduu.dev/utils
 gazelle(name="gazelle")
+
+go_library(
+    name="go_default_library",
+    srcs=["hello.go"],
+    importpath="aduu.dev/utils",
+    visibility=["//visibility:private"],
+)
+
+genrule(
+    name="claat_genrule",
+    tools=[
+        "@com_github_googlecodelabs_tools//claat",
+    ],
+    srcs=[],
+    outs=["hello.html"],
+    executable=1,
+    #cmd="$(SRCS) -h",
+    cmd="$(location @com_github_googlecodelabs_tools//claat)"
+)
+
+# genrule(
+#    name = "normalised_binary",
+#    srcs = [":some_binary"],
+#    outs = ["the_binary"],
+#    cmd = "cp $(SRCS) $@",
+# )

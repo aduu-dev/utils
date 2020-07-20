@@ -1,0 +1,22 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "env.go",
+        "getenv.go",
+    ],
+    importpath = "aduu.dev/utils/env",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["getenv_test.go"],
+    embed = [":go_default_library"],
+    deps = [
+        "//go/gomod:go_default_library",
+        "@com_github_google_uuid//:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
+    ],
+)

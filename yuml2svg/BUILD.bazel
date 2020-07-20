@@ -1,0 +1,23 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["generate-yumls.go"],
+    importpath = "aduu.dev/utils/yuml2svg",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//dash:go_default_library",
+        "@io_k8s_klog_v2//:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["generate-yumls_test.go"],
+    data = glob(["testdata/**"]),
+    embed = [":go_default_library"],
+    deps = [
+        "//dash:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
+    ],
+)

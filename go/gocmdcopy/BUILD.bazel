@@ -1,0 +1,25 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["copy.go"],
+    importpath = "aduu.dev/utils/go/gocmdcopy",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//expander:go_default_library",
+        "@com_github_otiai10_copy//:go_default_library",
+        "@org_golang_x_xerrors//:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["copy_test.go"],
+    embed = [":go_default_library"],
+    deps = [
+        "//go/gomod:go_default_library",
+        "//helper/testhelper:go_default_library",
+        "@com_github_stretchr_testify//assert:go_default_library",
+        "@org_golang_x_xerrors//:go_default_library",
+    ],
+)
