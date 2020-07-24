@@ -16,7 +16,7 @@ type SettingsFunc func(s *ExecuteSetting)
 
 // ExecuteSetting holds options to apply to a command runner.
 type ExecuteSetting struct {
-	dir     string
+	Dir     string
 	start   bool
 	timeout time.Duration
 	//executeAstemplate bool
@@ -38,7 +38,7 @@ func WithStart(s *ExecuteSetting) {
 // WithDir sets working directory to use when running the command.
 func WithDir(path string) SettingsFunc {
 	return func(s *ExecuteSetting) {
-		s.dir = path
+		s.Dir = path
 	}
 }
 
@@ -128,8 +128,8 @@ func createCommand(ctx context.Context,
 		return nil, cancel, errStartAndOutputIncompatible
 	}
 
-	if setting.dir != "" {
-		cmd.Dir = os.ExpandEnv(setting.dir)
+	if setting.Dir != "" {
+		cmd.Dir = os.ExpandEnv(setting.Dir)
 	}
 
 	if setting.output && len(setting.StdoutFile) != 0 {

@@ -17,16 +17,15 @@ import (
 	"golang.org/x/xerrors"
 
 	"aduu.dev/utils/exe"
-	"aduu.dev/utils/go/gomod"
-	"aduu.dev/utils/projectpath"
 	"aduu.dev/utils/tempdir"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/skratchdot/open-golang/open"
 )
 
 // Server starts a godoc server showing the given package path.
 type Server interface {
-	Serve(packagePath string, port int) (err error)
+	Serve(repoPath, packagePath string, port int) (err error)
 }
 
 // BaseSettings holds settings for the godoc server.
@@ -72,14 +71,14 @@ type server struct {
 }
 
 // Run shows aduu.dev via godoc by running a godoc server on the given port.
-func (s *server) Serve(packagePath string, port int) (err error) {
+func (s *server) Serve(repoPath, packagePath string, port int) (err error) {
 	defer func() {
 		if err != nil {
 			err = xerrors.Errorf("starting godoc failed: %w", err)
 		}
 	}()
 
-	dir, err := tempdir.MakeTempDirE(gomod.DirectCallerFunctionNameWithPackageName())
+	dir, err := tempdir.MakeTempDirE("godoc")
 	if err != nil {
 		return
 	}
@@ -91,17 +90,25 @@ func (s *server) Serve(packagePath string, port int) (err error) {
 		return err
 	}
 
-	s.mountDirectory = filepath.Join(dir, "src", "aduu.dev")
+	randString, err := uuid.GenerateUUID()
+	if err != nil {
+		return
+	}
+
+	// s.mountDirectory = filepath.Join(dir, "src", "aduu.dev")
+	s.mountDirectory = filepath.Join(dir, "src", randString)
 	if err = os.MkdirAll(s.mountDirectory, 0755); err != nil {
 		return err
 	}
 
-	ppath := projectpath.ProjectPath()
+	// ppath := projectpath.ProjectPath()
+	ppath := repoPath
 	ppath, err = filepath.EvalSymlinks(ppath)
 	if err != nil {
 		return err
 	}
-	aduuPath := filepath.Join(ppath, "aduu.dev")
+	//aduuPath := filepath.Join(ppath, "aduu.dev")
+	aduuPath := ppath
 
 	settings := struct {
 		MountPath      string

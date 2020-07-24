@@ -7,7 +7,7 @@ import (
 
 	"golang.org/x/xerrors"
 
-	"aduu.dev/utils/expander"
+	"aduu.dev/utils/expand"
 )
 
 const projectPrefix = "//"
@@ -64,7 +64,7 @@ func (ws Workspace) validateExpansion(path string) (err error) {
 // IsGomodPathPresent says whether the given path is expandable.
 func validatePathForExpansion(path string) error {
 	if !strings.HasPrefix(path, projectPrefix) {
-		return expander.ErrNoPrefix
+		return expand.ErrNoPrefix
 	}
 
 	runes := []rune(path)

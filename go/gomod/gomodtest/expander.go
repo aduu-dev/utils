@@ -4,7 +4,6 @@ package gomodtest
 import (
 	"testing"
 
-	"aduu.dev/utils/expander"
 	"aduu.dev/utils/go/gomod"
 )
 
@@ -12,9 +11,11 @@ import (
 func ExpandPath(t *testing.T, path string) string {
 	expandr := makeExpander(t)
 	newPath, err := expandr.ExpandPath(path)
+
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	return newPath
 }
 
@@ -22,16 +23,19 @@ func ExpandPath(t *testing.T, path string) string {
 func ExpandPackage(t *testing.T, path string) string {
 	expandr := makeExpander(t)
 	newPath, err := expandr.ExpandPackage(path)
+
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	return newPath
 }
 
-func makeExpander(t *testing.T) expander.Expander {
+func makeExpander(t *testing.T) *gomod.Workspace {
 	ws, err := gomod.GetWorkspaceFromWD()
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	return &ws
 }

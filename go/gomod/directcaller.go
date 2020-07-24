@@ -2,6 +2,7 @@ package gomod
 
 import (
 	"fmt"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -9,9 +10,46 @@ import (
 	"golang.org/x/xerrors"
 )
 
-// DirectCallerPackageE is same as DirectCallerPackagePanic but returns an error instead of panicing once an error occurs.
+// DirectCallerPackageE is same as DirectCallerPackagePanic
+// but returns an error instead of panicing once an error occurs.
 func DirectCallerPackageE() (s string, err error) {
 	return directCallerPackageE(3)
+}
+
+type callInfo struct {
+	packageName string
+	fileName    string
+	funcName    string
+	line        int
+}
+
+func retrieveCallInfo() *callInfo {
+	pc, file, line, _ := runtime.Caller(3)
+	_, fileName := path.Split(file)
+	parts := strings.Split(runtime.FuncForPC(pc).Name(), ".")
+	pl := len(parts)
+	packageName := ""
+	funcName := parts[pl-1]
+
+	fmt.Println("parts:", parts)
+	// parts: [
+	// 		go/gomod/directcallertest/go_default_test
+	//   	TestDirectCallerPackage
+	// ]
+
+	if parts[pl-2][0] == '(' {
+		funcName = parts[pl-2] + "." + funcName
+		packageName = strings.Join(parts[0:pl-2], ".")
+	} else {
+		packageName = strings.Join(parts[0:pl-1], ".")
+	}
+
+	return &callInfo{
+		packageName: packageName,
+		fileName:    fileName,
+		funcName:    funcName,
+		line:        line,
+	}
 }
 
 func directCallerPackageE(depth int) (s string, err error) {
@@ -21,27 +59,33 @@ func directCallerPackageE(depth int) (s string, err error) {
 		}
 	}()
 
-	currentDir := packagePathOfCaller(depth)
+	call := retrieveCallInfo()
 
-	ws, err := GetWorkspaceFromWD()
-	if err != nil {
-		return
-	}
+	return call.packageName, nil
 
-	gomodDir := filepath.Dir(ws.GomodPath)
+	/*
+		currentDir := packagePathOfCaller(depth)
 
-	if !strings.HasPrefix(currentDir, gomodDir) {
-		return "", fmt.Errorf("the directory the caller function resides in (%s)"+
-			"is not under the determined workspace (%s) with Module prefix (%s)"+
-			"and so package name cannot be determined", currentDir, ws.GomodPath, ws.Module)
-	}
+		ws, err := GetWorkspaceFromWD()
+		if err != nil {
+			return
+		}
 
-	fmt.Println("currentDir:", currentDir, "gomodDir:", gomodDir)
+		gomodDir := filepath.Dir(ws.GomodPath)
 
-	// Add module path in front, then add current file with root removed.
-	return strings.ReplaceAll(
-		ws.Module+"/"+strings.TrimPrefix(strings.TrimSuffix(strings.TrimPrefix(currentDir, gomodDir), string(filepath.Separator)), string(filepath.Separator)),
-		string(filepath.Separator), "/"), nil
+		if !strings.HasPrefix(currentDir, gomodDir) {
+			return "", fmt.Errorf("the directory the caller function resides in (%s)"+
+				"is not under the determined workspace (%s) with Module prefix (%s)"+
+				"and so package name cannot be determined", currentDir, ws.GomodPath, ws.Module)
+		}
+
+		fmt.Println("currentDir:", currentDir, "gomodDir:", gomodDir)
+
+		// Add module path in front, then add current file with root removed.
+		return strings.ReplaceAll(
+			ws.Module+"/"+strings.TrimPrefix(strings.TrimSuffix(strings.TrimPrefix(currentDir, gomodDir), string(filepath.Separator)), string(filepath.Separator)),
+			string(filepath.Separator), "/"), nil
+	*/
 }
 
 // DirectCallerPackagePanic returns the package name the working directory currently points to.

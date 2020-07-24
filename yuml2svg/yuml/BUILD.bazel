@@ -1,8 +1,8 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
-    name="go_default_library",
-    srcs=["yuml.go"],
-    importpath="aduu.dev/utils/yuml2svg/yuml",
-    visibility=["//visibility:public"],
+    name = "go_default_library",
+    srcs = ["yuml.go"],
+    importpath = "aduu.dev/utils/yuml2svg/yuml",
+    visibility = ["//visibility:public"],
 )

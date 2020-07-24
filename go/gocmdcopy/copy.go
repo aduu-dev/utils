@@ -9,7 +9,7 @@ import (
 
 	"github.com/otiai10/copy"
 
-	"aduu.dev/utils/expander"
+	"aduu.dev/utils/expand"
 )
 
 var (
@@ -18,34 +18,15 @@ var (
 )
 
 // Copy copies from to to. Errors out if to exists already. Expands from and to with the given expander.
-func Copy(exp expander.Expander, from string, to string) (err error) {
+func Copy(exp *expand.BaseExpander, from string, to string) (err error) {
 	defer func() {
 		if err != nil {
 			err = xerrors.Errorf("copying failed from %s to %s: %w", from, to, err)
 		}
 	}()
 
-	newFrom, err := exp.ExpandPath(from)
-	if err != nil {
-		if xerrors.Is(err, expander.ErrNoPrefix) {
-			// Do nothing.
-		} else {
-			return
-		}
-	} else {
-		from = newFrom
-	}
-
-	newTo, err := exp.ExpandPath(to)
-	if err != nil {
-		if xerrors.Is(err, expander.ErrNoPrefix) {
-			// Do nothing.
-		} else {
-			return
-		}
-	} else {
-		to = newTo
-	}
+	from = exp.ExpandFilepath(from)
+	to = exp.ExpandFilepath(to)
 
 	if !filepath.IsAbs(from) {
 		return ErrNotAbsolute

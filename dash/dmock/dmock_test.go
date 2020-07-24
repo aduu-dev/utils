@@ -27,7 +27,7 @@ func TestMock(t *testing.T) {
 			Name: "mount",
 			Args: []string{},
 		},
-		[]dash.SettingsFunc(nil),
+		&dash.ExecuteSetting{},
 	).Return(
 		want,
 		nil,

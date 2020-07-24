@@ -1,13 +1,13 @@
 load("@com_github_googlecodelabs_tools//claat:claat.bzl", "claat")
 
 claat(
-    name="examples",
-    srcs=[
+    name = "examples",
+    srcs = [
         ":example-mds",
     ],
 )
 
 filegroup(
-    name="example-mds",
-    srcs=glob(["**/*.md"]),
+    name = "example-mds",
+    srcs = glob(["**/*.md"]),
 )

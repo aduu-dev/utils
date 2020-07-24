@@ -1,45 +1,41 @@
 package packages
 
 import (
-	"path/filepath"
-	"reflect"
-	"sort"
+	"context"
 	"testing"
+
+	"aduu.dev/utils/dash"
+	"aduu.dev/utils/dash/dmock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestListPackages(t *testing.T) {
-	type args struct {
-		fromPath string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    []string
-		wantErr bool
-	}{
-		{
-			name: "works",
-			args: args{
-				fromPath: "",
-			},
-			want:    []string{"my.test/a", "my.test/b", "my.test"},
-			wantErr: false,
-		},
-	}
-	for _, tt2 := range tests {
-		tt := tt2
-		t.Run(tt.name, func(t *testing.T) {
-			tt.args.fromPath = filepath.Join("testdata/data")
-			sort.Strings(tt.want)
+	m := dmock.New()
 
-			got, err := ListPackages(tt.args.fromPath)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ListPackages() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ListPackages() = %v, want %v", got, tt.want)
-			}
-		})
+	m.On("RunWithOutputE",
+		context.Background(),
+		&dash.SplitResult{
+			Name: "go",
+			Args: []string{
+				"list", "./...",
+			},
+		},
+		&dash.ExecuteSetting{Dir: "abc"},
+	).Return(
+		`my.test
+my.test/a
+my.test/b`,
+		nil,
+	)
+
+	want := []string{
+		"my.test",
+		"my.test/a",
+		"my.test/b",
 	}
+	got, err := ListPackages(m, "abc")
+	assert.NoError(t, err)
+	assert.Equal(t, want, got)
+
+	m.AssertExpectations(t)
 }
