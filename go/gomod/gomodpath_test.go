@@ -3,6 +3,7 @@ package gomod
 import (
 	"path/filepath"
 	"strings"
+	"sys"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -197,6 +198,8 @@ func TestBaseExpanderFromWorkspace(t *testing.T) {
 		wantErr: false,
 	*/
 
+	GOOS = sys.GOOS
+
 	ws := Workspace{
 		GomodPath: "/abc/go.mod",
 		Module:    "aduu.dev/hello/world",
@@ -204,5 +207,12 @@ func TestBaseExpanderFromWorkspace(t *testing.T) {
 
 	exp := ws.BaseExpander()
 
-	assert.Equal(t, "/abc", exp.Base())
+	want := "/"
+	if GOOS == "windows" {
+		want = "\\\\"
+	}
+
+	want += "abc"
+
+	assert.Equal(t, want, exp.Base())
 }
