@@ -62,5 +62,5 @@ func (b *BaseExpander) Expand(path string) string {
 // ExpandFilepath replaces BasePrefix at the front with the
 // stored base filepath.
 func (b *BaseExpander) ExpandFilepath(path string) string {
-	return Expand(b.base, path)
+	return ExpandFilepath(b.base, path)
 }
