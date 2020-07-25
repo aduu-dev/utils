@@ -6,8 +6,8 @@ import (
 
 // Expander is an interface for components which are able to expand path prefixes to absolute paths.
 type Expander interface {
-	Expand(path string) (string, error)
-	IsExpandable(path string) error
+	Expand(path string) string
+	ExpandFilepath(path string) string
 }
 
 var (
