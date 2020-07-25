@@ -12,6 +12,7 @@ func TestExpand(t *testing.T) {
 		base string
 		path string
 	}
+
 	tests := []struct {
 		name         string
 		args         args
@@ -19,9 +20,9 @@ func TestExpand(t *testing.T) {
 		wantFilepath string
 	}{
 		{
-			name:     "test not expanding if not present",
-			args:     args{base: "", path: "/abc"},
-			wantPath: "/abc",
+			name:         "test not expanding if not present",
+			args:         args{base: "", path: "/abc"},
+			wantPath:     "/abc",
 			wantFilepath: "/abc",
 		},
 		{

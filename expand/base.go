@@ -44,6 +44,8 @@ func HasPrefix(path string) bool {
 	return strings.HasPrefix(path, BasePrefix)
 }
 
+var _ Expander = Base(".")
+
 // BaseExpander expands based on the given base.
 type BaseExpander struct {
 	base string
