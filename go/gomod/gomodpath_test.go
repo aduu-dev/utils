@@ -2,7 +2,6 @@ package gomod
 
 import (
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
 
@@ -204,13 +203,7 @@ func TestBaseExpanderFromWorkspace(t *testing.T) {
 	}
 
 	exp := ws.BaseExpander()
-
-	want := "/"
-	if runtime.GOOS == "windows" {
-		want = "\\\\"
-	}
-
-	want += "abc"
+	want := string(filepath.Separator) + "abc"
 
 	assert.Equal(t, want, exp.Base())
 }
