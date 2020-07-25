@@ -198,7 +198,7 @@ func TestBaseExpanderFromWorkspace(t *testing.T) {
 		wantErr: false,
 	*/
 
-	GOOS = sys.GOOS
+	GOOS := sys.GOOS
 
 	ws := Workspace{
 		GomodPath: "/abc/go.mod",
