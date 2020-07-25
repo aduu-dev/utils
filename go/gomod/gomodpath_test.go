@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWorkspace_ExpandGomodPath(t *testing.T) {
@@ -16,7 +18,6 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 		workspace            Workspace
 		args                 args
 		want                 string
-		wantErr              bool
 		doNotExpandGomodPath bool
 	}{
 		// OK.
@@ -29,8 +30,7 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 			args: args{
 				path: "//",
 			},
-			want:    "",
-			wantErr: false,
+			want: "",
 		},
 		{
 			name: "test expanding when not only //",
@@ -41,8 +41,7 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 			args: args{
 				path: "//abc",
 			},
-			want:    "/abc",
-			wantErr: false,
+			want: "/abc",
 		},
 		{
 			name: "do not care if Module stringis zero length",
@@ -53,10 +52,10 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 			args: args{
 				path: "//abc",
 			},
-			want:    "/abc",
-			wantErr: false,
+			want: "/abc",
 		},
 	}
+
 	for _, tt2 := range tests {
 		tt := tt2
 		t.Run(tt.name, func(t *testing.T) {
@@ -72,13 +71,8 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				// Expand want if there is no error.
-				if !tt.wantErr {
-					tt.want = filepath.Join(filepath.Dir(ws.GomodPath), strings.TrimPrefix(tt.want, "/"))
-				}
+				tt.want = filepath.Join(filepath.Dir(ws.GomodPath), strings.TrimPrefix(tt.want, "/"))
 			}
-
-			// Adapt want to include GomodPath if no error occured.
 
 			got := ws.ExpandFilepath(tt.args.path)
 			if got != tt.want {
@@ -92,6 +86,7 @@ func TestIsGomodPathPresent(t *testing.T) {
 	type args struct {
 		path string
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -134,9 +129,11 @@ func TestWorkspace_ExpandPackage(t *testing.T) {
 		GomodPath string
 		Module    string
 	}
+
 	type args struct {
 		path string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -157,6 +154,7 @@ func TestWorkspace_ExpandPackage(t *testing.T) {
 			wantErr: false,
 		},
 	}
+
 	for _, tt2 := range tests {
 		tt := tt2
 		t.Run(tt.name, func(t *testing.T) {
@@ -183,4 +181,28 @@ func TestWorkspace_ExpandPackage(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestBaseExpanderFromWorkspace(t *testing.T) {
+	/*
+			name: "expand correctly",
+		fields: fields{
+			GomodPath: "/abc/go.mod",
+			Module:    "aduu.dev/hello/world",
+		},
+		args: args{
+			path: "//pkg/internal",
+		},
+		wantS:   "aduu.dev/hello/world/pkg/internal",
+		wantErr: false,
+	*/
+
+	ws := Workspace{
+		GomodPath: "/abc/go.mod",
+		Module:    "aduu.dev/hello/world",
+	}
+
+	exp := ws.BaseExpander()
+
+	assert.Equal(t, "/abc", exp.Base())
 }
