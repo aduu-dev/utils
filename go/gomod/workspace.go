@@ -10,6 +10,7 @@ import (
 
 	"golang.org/x/xerrors"
 
+	"aduu.dev/utils/expand"
 	"aduu.dev/utils/helper"
 )
 
@@ -18,6 +19,8 @@ type Workspace struct {
 	GomodPath string
 	Module    string
 }
+
+var _ expand.Expander = &Workspace{}
 
 // GetWorkspace returns the workspace fromPath is part of.
 func GetWorkspace(fromPath string) (ws Workspace, err error) {

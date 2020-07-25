@@ -2,6 +2,7 @@ package gomod
 
 import (
 	"fmt"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -12,23 +13,24 @@ import (
 
 const projectPrefix = "//"
 
-// ExpandPath expands paths with leading //-prefix with the folder the nearest go.mod resides in.
-func (ws *Workspace) ExpandPath(path string) (s string, err error) {
-	defer func() {
-		if err != nil {
-			err = xerrors.Errorf("failed to expand with Workspace %#v: %w", ws, err)
-		}
-	}()
-
-	if err = ws.validateExpansion(path); err != nil {
-		return
-	}
+// Expand expands paths with leading //-prefix with the folder the nearest go.mod resides in.
+func (ws *Workspace) Expand(p string) string {
 	gomodDir := ws.GomodPathDirectory()
 
 	// Trim project prefix.
-	path = strings.TrimPrefix(path, projectPrefix)
+	p = strings.TrimPrefix(p, expand.BasePrefix)
 
-	return filepath.Join(gomodDir, path), nil
+	return path.Join(gomodDir, p)
+}
+
+// ExpandFilepath expands paths with leading //-prefix with the folder the nearest go.mod resides in.
+func (ws *Workspace) ExpandFilepath(path string) string {
+	gomodDir := ws.GomodPathDirectory()
+
+	// Trim project prefix.
+	path = strings.TrimPrefix(path, expand.BasePrefix)
+
+	return filepath.Join(gomodDir, path)
 }
 
 func (ws Workspace) validateExpansion(path string) (err error) {

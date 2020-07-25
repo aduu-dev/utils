@@ -56,83 +56,6 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 			want:    "/abc",
 			wantErr: false,
 		},
-
-		// Errors.
-		{
-			name: "error if GomodPath does not have /go.mod suffix",
-			workspace: Workspace{
-				GomodPath: "/abc",
-				Module:    "",
-			},
-			args: args{
-				path: "//abc",
-			},
-			want:    "",
-			wantErr: true,
-		},
-		{
-			name: "return error if not present",
-			workspace: Workspace{
-				GomodPath: "/hello/world/go.mod",
-				Module:    "github.com/hello",
-			},
-			args: args{
-				path: "",
-			},
-			want:    "",
-			wantErr: true,
-		},
-		{
-			name: "test error if GomodPath is == /go.mod",
-			workspace: Workspace{
-				GomodPath: "/go.mod",
-				Module:    "abc",
-			},
-			args: args{
-				path: "//abc",
-			},
-			want:                 "",
-			wantErr:              true,
-			doNotExpandGomodPath: true,
-		},
-		{
-			name: "error out if GomodPath is not absolute length",
-			workspace: Workspace{
-				GomodPath: "abc/go.mod",
-				Module:    "",
-			},
-			args: args{
-				path: "//abc",
-			},
-			want:                 "",
-			wantErr:              true,
-			doNotExpandGomodPath: true,
-		},
-		{
-			name: "error if GomodPath has slash at the end",
-			workspace: Workspace{
-				GomodPath: "/abc/go.mod/",
-				Module:    "",
-			},
-			args: args{
-				path: "//abc",
-			},
-			want:                 "",
-			wantErr:              true,
-			doNotExpandGomodPath: true,
-		},
-		{
-			name: "error if path starts with more than two slashes at the beginning",
-			workspace: Workspace{
-				GomodPath: "/abc/go.mod",
-				Module:    "",
-			},
-			args: args{
-				path: "///abc",
-			},
-			want:    "",
-			wantErr: true,
-		},
 	}
 	for _, tt2 := range tests {
 		tt := tt2
@@ -157,13 +80,9 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 
 			// Adapt want to include GomodPath if no error occured.
 
-			got, err := ws.ExpandPath(tt.args.path)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("%#v.ExpandPath() error = %v, wantErr %v", ws, err, tt.wantErr)
-				return
-			}
+			got := ws.Expand(tt.args.path)
 			if got != tt.want {
-				t.Errorf("%#v.ExpandPath() =\n got: %v,\nwant: %v", ws, got, tt.want)
+				t.Errorf("%#v.Expand() =\n got: %v,\nwant: %v", ws, got, tt.want)
 			}
 		})
 	}

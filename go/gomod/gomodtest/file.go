@@ -20,7 +20,7 @@ func WriteFileJSON(t *testing.T, path string, data interface{}) {
 // WriteFile writes the given data to the given path,
 // which is being expanded based on the current Go Module.
 func WriteFile(t *testing.T, path string, data []byte) {
-	expandedPath := ExpandPath(t, path)
+	expandedPath := ExpandFilepath(t, path)
 	if err := ioutil.WriteFile(expandedPath, data, 0755); err != nil {
 		t.Fatalf("failed to data to %#v: %v", path, err)
 	}
@@ -38,7 +38,7 @@ func ReadFileJSON(t *testing.T, path string, data interface{}) {
 
 // ReadFile reads from the given path data and returns it.
 func ReadFile(t *testing.T, path string) []byte {
-	expandedPath := ExpandPath(t, path)
+	expandedPath := ExpandFilepath(t, path)
 
 	readData, err := ioutil.ReadFile(expandedPath)
 	if err != nil {

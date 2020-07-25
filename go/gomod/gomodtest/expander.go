@@ -8,13 +8,9 @@ import (
 )
 
 // ExpandPath expands the package path inside tests.
-func ExpandPath(t *testing.T, path string) string {
+func ExpandFilepath(t *testing.T, path string) string {
 	expandr := makeExpander(t)
-	newPath, err := expandr.ExpandPath(path)
-
-	if err != nil {
-		t.Fatal(err)
-	}
+	newPath := expandr.ExpandFilepath(path)
 
 	return newPath
 }
