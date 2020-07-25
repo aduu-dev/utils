@@ -80,7 +80,7 @@ func TestWorkspace_ExpandGomodPath(t *testing.T) {
 
 			// Adapt want to include GomodPath if no error occured.
 
-			got := ws.Expand(tt.args.path)
+			got := ws.ExpandFilepath(tt.args.path)
 			if got != tt.want {
 				t.Errorf("%#v.Expand() =\n got: %v,\nwant: %v", ws, got, tt.want)
 			}
