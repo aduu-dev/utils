@@ -45,7 +45,6 @@ func (m *MockRunner) RunWithOutputE(ctx context.Context,
 	settings ...dash.SettingsFunc,
 ) (out string, err error) {
 	args := m.Called(ctx, splitResult, applySettings(settings))
-	// args := m.Called(ctx, splitResult, applySettings(settings))
 
 	return args.String(0), args.Error(1)
 }
