@@ -1,0 +1,65 @@
+issues:
+  # List of regexps of issue texts to exclude, empty list by default.
+  # But independently from this option we use default exclude patterns,
+  # it can be disabled by `exclude-use-default: false`. To list all
+  # excluded by default patterns execute `golangci-lint run --help`
+  #
+  # Source:
+  #   https://github.com/kyoh86/scopelint/issues/4#issuecomment-525540030
+  exclude:
+    - Using the variable on range scope `tt` in function literal
+    - Using the variable on range scope `testtype` in function literal
+linters:
+  linters:
+    disable-all: true
+    enable:
+      - bodyclose
+      - deadcode
+      - depguard
+      - dogsled
+      - dupl
+      - errcheck
+      - exhaustive
+      - funlen
+      - gochecknoinits
+      - goconst
+      - gocritic
+      - gocyclo
+      - gofmt
+      - goimports
+      - golint
+      - gomnd
+      - goprintffuncname
+      - gosec
+      - gosimple
+      - govet
+      - ineffassign
+      - interfacer
+      - lll
+      - misspell
+      - nakedret
+      - noctx
+      - nolintlint
+      - rowserrcheck
+      - scopelint
+      - staticcheck
+      - structcheck
+      - stylecheck
+      - typecheck
+      - unconvert
+      - unparam
+      - unused
+      - varcheck
+      - whitespace
+    # don't enable:
+    # - asciicheck
+    # - gochecknoglobals
+    # - gocognit
+    # - godot
+    # - godox
+    # - goerr113
+    # - maligned
+    # - nestif
+    # - prealloc
+    # - testpackage
+    # - wsl

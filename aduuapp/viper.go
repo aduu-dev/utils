@@ -24,11 +24,17 @@ type ViperSetup struct {
 	writeConfigFlag   *bool
 	readConfigErr     error
 
+	config *SetupViperConfig
+
 	v *viper.Viper
 }
 
+// SetupViperConfig options ot pass to SetupViper.
+type SetupViperConfig struct {
+}
+
 // SetupViper sets up viper for immediate use.
-func SetupViper(appName string) (setup *ViperSetup, v *viper.Viper) {
+func SetupViper(appName string, req *SetupViperConfig) (setup *ViperSetup, v *viper.Viper) {
 	defaultConfigPath := filepath.Join(os.Getenv("HOME"), "."+appName)
 	defaultConfig := filepath.Join(defaultConfigPath, appName+".yaml")
 	v = viper.New()
@@ -43,24 +49,34 @@ func SetupViper(appName string) (setup *ViperSetup, v *viper.Viper) {
 		defaultConfig:     defaultConfig,
 		defaultConfigPath: defaultConfigPath,
 		readConfigErr:     v.ReadInConfig(),
+		config:            req,
 		v:                 v,
 	}, v
 }
 
-// SetupKlogFlags adds klog flags to the given command together with a -w flag.
+// SetupFlagsConfig contains options to enable or disable certain flags from being added.
+type SetupFlagsConfig struct {
+	DisableWriteConfigFlag bool
+}
+
+// SetupFlags adds klog flags to the given command together with a -w flag.
 // The -w flag enables saving the current viper state to the default config file.
-func (setup *ViperSetup) SetupKlogFlags(cmd *cobra.Command) {
-	fs := flag.NewFlagSet("klog", flag.ExitOnError)
+func (setup *ViperSetup) SetupFlags(
+	cmd *cobra.Command,
+	flagsConfig *SetupFlagsConfig,
+) {
+	fs := flag.NewFlagSet("log", flag.ExitOnError)
 	klog.InitFlags(fs)
-	flag.Parse()
 
 	cmd.PersistentFlags().AddGoFlag(fs.Lookup("v"))
 	cmd.PersistentFlags().AddGoFlag(fs.Lookup("logtostderr"))
 
-	setup.writeConfigFlag = cmd.Flags().BoolP(
-		"write-given-settings", "w", false,
-		"writes all given persistent flags to the config file and exits the program",
-	)
+	if !flagsConfig.DisableWriteConfigFlag {
+		setup.writeConfigFlag = cmd.Flags().BoolP(
+			"write-given-settings", "w", false,
+			"writes all given persistent flags to the config file and exits the program",
+		)
+	}
 }
 
 // IsWriteConfigSet return whether the config write flag was set.
