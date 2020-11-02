@@ -35,8 +35,12 @@ type Runner interface {
 	*/
 }
 
+// NewRunner creates the default runner.
+// The default log-level is 5 (the highest) to hide debug messages.
 func NewRunner(opts ...RunnerOpt) Runner {
-	r := &runner{}
+	r := &runner{
+		logLevel: 5,
+	}
 
 	// Apply options.
 	for _, opt := range opts {
@@ -121,7 +125,7 @@ func (r *runner) RunWithOutputE(ctx context.Context, splitResult *SplitResult,
 		return "", splitResult.Err
 	}
 
-	klog.InfoS("Executing", "command", strings.Join(splitResult.command(), " "))
+	klog.V(r.logLevel).InfoS("Executing", "command", strings.Join(splitResult.command(), " "))
 
 	setting := extractSettingsFromSlice(append(settings, withOutput))
 
