@@ -35,11 +35,30 @@ type Runner interface {
 	*/
 }
 
-func NewRunner() Runner {
-	return &runner{}
+func NewRunner(opts ...RunnerOpt) Runner {
+	r := &runner{}
+
+	// Apply options.
+	for _, opt := range opts {
+		opt(r)
+	}
+
+	return r
 }
 
+// RunnerOpt functions can be passed to NewRunner to configure it for all
+// the runners' calls.
+type RunnerOpt func(*runner)
+
 type runner struct {
+	logLevel klog.Level
+}
+
+// LogLevel sets the log-level for log-messages like "Executing ..." .
+func LogLevel(level klog.Level) RunnerOpt {
+	return func(r *runner) {
+		r.logLevel = level
+	}
 }
 
 /*
@@ -58,7 +77,7 @@ func (r *runner) RunE(ctx context.Context, splitResult *SplitResult,
 		return splitResult.Err
 	}
 
-	klog.InfoS("Executing", "command", strings.Join(splitResult.command(), " "))
+	klog.V(r.logLevel).InfoS("Executing", "command", strings.Join(splitResult.command(), " "))
 
 	setting := extractSettingsFromSlice(settings)
 
