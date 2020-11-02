@@ -122,3 +122,10 @@ func TestRunner_WithTimeout(t *testing.T) {
 	}
 
 }
+
+func TestRunnerOpts(t *testing.T) {
+	runnr := NewRunner(LogLevel(4))
+	r := runnr.(*runner)
+
+	assert.Equal(t, klog.Level(4), r.logLevel)
+}
