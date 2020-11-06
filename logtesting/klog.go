@@ -1,3 +1,4 @@
+// Package logtesting can set the logLevel inside tests to show debug messages printed with klog.
 package logtesting
 
 import (

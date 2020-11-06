@@ -7,17 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"aduu.dev/utils/go/gomod"
-	"aduu.dev/utils/tempdir"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/klog/v2"
 )
 
 func TestLogLevel5(t *testing.T) {
-	dir := tempdir.MakeTempDir(gomod.DirectCallerFunctionNameWithPackageName())
-	t.Cleanup(func() {
-		tempdir.DeleteTempDir(dir)
-	})
+	dir := t.TempDir()
 	tempFile := filepath.Join(dir, "logs.log")
 
 	LogLevel5()
