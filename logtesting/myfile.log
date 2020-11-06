@@ -1,0 +1,5 @@
+Log file created at: 2020/11/06 12:40:37
+Running on machine: Mac1
+Binary: Built with gc go1.15.3 for darwin/amd64
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I1106 12:40:37.096665   86113 klog_test.go:47] "hello"
