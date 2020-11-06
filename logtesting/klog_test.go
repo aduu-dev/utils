@@ -26,6 +26,13 @@ func TestLogLevel5(t *testing.T) {
 	fs.Set("logtostderr", "false")
 	fs.Set("log_file", tempFile)
 
+	// Stop using the logfile later.
+	defer func() {
+		fs.Set("log_file", "")
+
+		fs.Parse([]string{})
+	}()
+
 	if err := fs.Parse([]string{}); err != nil {
 		panic("failed to parse flags")
 	}
