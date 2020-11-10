@@ -70,6 +70,10 @@ func (setup *ViperSetup) SetupFlags(
 
 	cmd.PersistentFlags().AddGoFlag(fs.Lookup("v"))
 	cmd.PersistentFlags().AddGoFlag(fs.Lookup("logtostderr"))
+	cmd.PersistentFlags().AddGoFlag(fs.Lookup("log_file"))
+	cmd.PersistentFlags().AddGoFlag(fs.Lookup("log_dir"))
+	cmd.PersistentFlags().AddGoFlag(fs.Lookup("alsologtostderr"))
+	cmd.PersistentFlags().AddGoFlag(fs.Lookup("stderrthreshold"))
 
 	if !flagsConfig.DisableWriteConfigFlag {
 		setup.writeConfigFlag = cmd.Flags().BoolP(

@@ -5,3 +5,4 @@ vendor/
 *.iml
 bazel-*
 external
+.history

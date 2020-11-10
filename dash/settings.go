@@ -137,10 +137,13 @@ func createCommand(ctx context.Context,
 	}
 
 	if len(setting.StdinFile) == 0 {
-		klog.V(5).InfoS("No stdin file to open")
+		klog.V(5).InfoS("Setting stdin to os.Stdin")
 		cmd.Stdin = os.Stdin
 	} else {
-		klog.V(5).InfoS("Opening stdin file")
+		klog.V(5).InfoS("Seting stdin to file",
+			"file", setting.StdinFile,
+		)
+
 		stdin, err := os.OpenFile(setting.StdinFile, os.O_RDWR, 0755)
 
 		if err != nil {
@@ -150,14 +153,20 @@ func createCommand(ctx context.Context,
 		}
 
 		cmd.Stdin = stdin
-		klog.V(5).InfoS("Add stdin to open files")
+		klog.V(5).InfoS("Adding stdin to open files")
 		setting.openFiles = append(setting.openFiles, stdin)
 	}
 
 	if !setting.output {
 		if len(setting.StdoutFile) == 0 {
+			klog.V(5).InfoS("Setting stdout to os.Stdout")
+
 			cmd.Stdout = os.Stdout
 		} else {
+			klog.V(5).InfoS("Seting stdout to file",
+				"file", setting.StdoutFile,
+			)
+
 			stdout, err := os.OpenFile(setting.StdoutFile, os.O_CREATE|os.O_WRONLY, 0755)
 
 			if err != nil {
@@ -173,27 +182,19 @@ func createCommand(ctx context.Context,
 	}
 
 	if len(setting.StderrFile) == 0 {
+		klog.V(5).InfoS("Setting stderr to os.Stderr")
+
 		cmd.Stderr = os.Stderr
 	} else {
+		klog.V(5).InfoS("Seting stdout to file",
+			"file", setting.StdoutFile,
+		)
+
 		stderr, err := os.OpenFile(setting.StderrFile, os.O_CREATE|os.O_WRONLY, 0755)
 
 		if err != nil {
 			klog.ErrorS(err, "Error opening stderr",
 				"file", setting.StderrFile)
-			return nil, cancel, err
-		}
-
-		cmd.Stderr = stderr
-
-		setting.openFiles = append(setting.openFiles, stderr)
-	}
-
-	if len(setting.StderrFile) == 0 {
-		cmd.Stderr = os.Stderr
-	} else {
-		stderr, err := os.OpenFile(setting.StderrFile, os.O_CREATE|os.O_WRONLY, 0755)
-
-		if err != nil {
 			return nil, cancel, err
 		}
 
