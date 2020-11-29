@@ -22,7 +22,7 @@ type GRPCWebService struct {
 
 // Run runs the grpc web service.
 func (service *GRPCWebService) Run(m *runmanager.RunManager) {
-	wrappedGrpc := grpcweb.WrapServer(service.GrpcServer)
+	wrappedGrpc := grpcweb.WrapServer(service.GrpcServer, grpcweb.WithCorsForRegisteredEndpointsOnly(false))
 
 	// Pass the reques to this router in case it is no grpc web request.
 	router := http.NewServeMux()
