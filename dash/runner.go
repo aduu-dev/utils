@@ -3,7 +3,6 @@ package dash
 import (
 	"context"
 	"strings"
-	"syscall"
 
 	"k8s.io/klog/v2"
 )
@@ -87,37 +86,40 @@ func (r *runner) RunE(ctx context.Context, splitResult *SplitResult,
 	setting := extractSettingsFromSlice(settings)
 
 	cmd, cancel, err := createCommand(ctx, splitResult, &setting)
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
-	go func() {
-		<-ctx.Done()
+	/*
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
-		klog.V(5).InfoS("Killing now")
-		pgid, err := syscall.Getpgid(cmd.Process.Pid)
-		if err == nil {
-			err = syscall.Kill(-pgid, 15) // note the minus sign
-			if err != nil {
-				klog.ErrorS(err, "failed to kill process group",
-					"pgid", pgid,
-				)
+		go func() {
+			<-ctx.Done()
+
+			klog.V(5).InfoS("Killing now")
+			pgid, err := syscall.Getpgid(cmd.Process.Pid)
+			if err == nil {
+				err = syscall.Kill(-pgid, 15) // note the minus sign
+				if err != nil {
+					klog.ErrorS(err, "failed to kill process group",
+						"pgid", pgid,
+					)
+				} else {
+					klog.V(5).InfoS("Killed with syscall 15 sucessfully")
+				}
+
 			} else {
-				klog.V(5).InfoS("Killed with syscall 15 sucessfully")
+				klog.ErrorS(err, "failed to find process group gid")
 			}
 
-		} else {
-			klog.ErrorS(err, "failed to find process group gid")
-		}
+			err = cmd.Process.Kill()
+			if err != nil {
+				klog.ErrorS(err, "failed to kill process usual way")
+			} else {
+				klog.InfoS("Killed the normal way successfully")
+			}
 
-		err = cmd.Process.Kill()
-		if err != nil {
-			klog.ErrorS(err, "failed to kill process usual way")
-		} else {
-			klog.InfoS("Killed the normal way successfully")
-		}
+			//klog.ErrorS(err, "failed to kill process the usual way")
 
-		//klog.ErrorS(err, "failed to kill process the usual way")
-
-	}()
+		}()
+	*/
 
 	defer func() {
 		cancel()
