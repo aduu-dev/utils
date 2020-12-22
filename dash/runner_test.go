@@ -120,7 +120,6 @@ func TestRunner_WithTimeout(t *testing.T) {
 	if !assert.NoError(t, err) {
 		t.Fail()
 	}
-
 }
 
 func TestRunnerOpts(t *testing.T) {
