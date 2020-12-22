@@ -2,7 +2,6 @@ package dash
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"syscall"
 
@@ -113,14 +112,11 @@ func (r *runner) RunE(ctx context.Context, splitResult *SplitResult,
 		if err != nil {
 			klog.ErrorS(err, "failed to kill process usual way")
 		} else {
-			fmt.Println("Killed the normal way successfully")
+			klog.InfoS("Killed the normal way successfully")
 		}
 
 		//klog.ErrorS(err, "failed to kill process the usual way")
 
-		klog.V(5).InfoS("Killed process group",
-			"pid", cmd.Process.Pid,
-		)
 	}()
 
 	defer func() {
