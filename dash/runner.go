@@ -3,6 +3,7 @@ package dash
 import (
 	"context"
 	"strings"
+	"syscall"
 
 	"k8s.io/klog/v2"
 )
@@ -86,6 +87,19 @@ func (r *runner) RunE(ctx context.Context, splitResult *SplitResult,
 	setting := extractSettingsFromSlice(settings)
 
 	cmd, cancel, err := createCommand(ctx, splitResult, &setting)
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+
+	go func() {
+		<-ctx.Done()
+		pgid, err := syscall.Getpgid(cmd.Process.Pid)
+		if err == nil {
+			_ = syscall.Kill(-pgid, 15) // note the minus sign
+		}
+
+		klog.V(5).InfoS("Killed process group",
+			"pid", cmd.Process.Pid,
+		)
+	}()
 
 	defer func() {
 		cancel()
