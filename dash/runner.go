@@ -2,6 +2,7 @@ package dash
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"syscall"
 
@@ -92,20 +93,27 @@ func (r *runner) RunE(ctx context.Context, splitResult *SplitResult,
 	go func() {
 		<-ctx.Done()
 
-		err = cmd.Process.Kill()
-		if err != nil {
-			klog.ErrorS(err, "failed to kill process usual way")
-		}
-
 		klog.V(5).InfoS("Killing now")
 		pgid, err := syscall.Getpgid(cmd.Process.Pid)
 		if err == nil {
 			err = syscall.Kill(-pgid, 15) // note the minus sign
-			klog.ErrorS(err, "failed to kill process group",
-				"pgid", pgid,
-			)
+			if err != nil {
+				klog.ErrorS(err, "failed to kill process group",
+					"pgid", pgid,
+				)
+			} else {
+				klog.V(5).InfoS("Killed with syscall 15 sucessfully")
+			}
+
 		} else {
 			klog.ErrorS(err, "failed to find process group gid")
+		}
+
+		err = cmd.Process.Kill()
+		if err != nil {
+			klog.ErrorS(err, "failed to kill process usual way")
+		} else {
+			fmt.Println("Killed the normal way successfully")
 		}
 
 		//klog.ErrorS(err, "failed to kill process the usual way")
