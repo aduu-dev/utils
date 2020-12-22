@@ -95,7 +95,7 @@ func (r *runner) RunE(ctx context.Context, splitResult *SplitResult,
 
 		_ = cmd.Process.Kill()
 
-		if cmd.ProcessState.Exited() {
+		if cmd.ProcessState == nil || cmd.ProcessState.Exited() {
 			return
 		}
 
