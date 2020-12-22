@@ -87,7 +87,7 @@ func (r *runner) RunE(ctx context.Context, splitResult *SplitResult,
 	setting := extractSettingsFromSlice(settings)
 
 	cmd, cancel, err := createCommand(ctx, splitResult, &setting)
-	//cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
 	go func() {
 		<-ctx.Done()
