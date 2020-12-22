@@ -93,16 +93,18 @@ func (r *runner) RunE(ctx context.Context, splitResult *SplitResult,
 		<-ctx.Done()
 		pgid, err := syscall.Getpgid(cmd.Process.Pid)
 		if err == nil {
-			err = syscall.Kill(-pgid, 15) // note the minus sign
-			klog.ErrorS(err, "failed to kill process group",
-				"pgid", pgid,
-			)
-		} else {
+			_ = syscall.Kill(-pgid, 15) // note the minus sign
+			//klog.ErrorS(err, "failed to kill process group",
+			//	"pgid", pgid,
+			//)
+		}
+		/* else {
 			klog.ErrorS(err, "failed to find process group gid")
 		}
+		*/
 
-		err = cmd.Process.Kill()
-		klog.ErrorS(err, "failed to kill process the usual way")
+		_ = cmd.Process.Kill()
+		//klog.ErrorS(err, "failed to kill process the usual way")
 
 		klog.V(5).InfoS("Killed process group",
 			"pid", cmd.Process.Pid,
