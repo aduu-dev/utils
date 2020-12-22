@@ -96,6 +96,8 @@ func (r *runner) RunE(ctx context.Context, splitResult *SplitResult,
 			_ = syscall.Kill(-pgid, 15) // note the minus sign
 		}
 
+		_ = cmd.Process.Kill()
+
 		klog.V(5).InfoS("Killed process group",
 			"pid", cmd.Process.Pid,
 		)
