@@ -87,37 +87,26 @@ func (r *runner) RunE(ctx context.Context, splitResult *SplitResult,
 	setting := extractSettingsFromSlice(settings)
 
 	cmd, cancel, err := createCommand(ctx, splitResult, &setting)
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	//cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
 	go func() {
 		<-ctx.Done()
 
-		_ = cmd.Process.Kill()
+		err = cmd.Process.Kill()
+		if err != nil {
+			klog.ErrorS(err, "failed to kill process usual way")
+		}
 
-		/*
-			if cmd.ProcessState == nil || cmd.ProcessState.Exited() {
-				return
-			}
-
-			// Wait for 1s to exit the good way before trying to kill it.
-			time.Sleep(time.Second)
-
-			if cmd.ProcessState.Exited() {
-				return
-			}
-		*/
-
+		klog.V(5).InfoS("Killing now")
 		pgid, err := syscall.Getpgid(cmd.Process.Pid)
 		if err == nil {
-			_ = syscall.Kill(-pgid, 15) // note the minus sign
-			//klog.ErrorS(err, "failed to kill process group",
-			//	"pgid", pgid,
-			//)
-		}
-		/* else {
+			err = syscall.Kill(-pgid, 15) // note the minus sign
+			klog.ErrorS(err, "failed to kill process group",
+				"pgid", pgid,
+			)
+		} else {
 			klog.ErrorS(err, "failed to find process group gid")
 		}
-		*/
 
 		//klog.ErrorS(err, "failed to kill process the usual way")
 
