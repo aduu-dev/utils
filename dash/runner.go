@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 	"syscall"
-	"time"
 
 	"k8s.io/klog/v2"
 )
@@ -95,16 +94,18 @@ func (r *runner) RunE(ctx context.Context, splitResult *SplitResult,
 
 		_ = cmd.Process.Kill()
 
-		if cmd.ProcessState == nil || cmd.ProcessState.Exited() {
-			return
-		}
+		/*
+			if cmd.ProcessState == nil || cmd.ProcessState.Exited() {
+				return
+			}
 
-		// Wait for 1s to exit the good way before trying to kill it.
-		time.Sleep(time.Second)
+			// Wait for 1s to exit the good way before trying to kill it.
+			time.Sleep(time.Second)
 
-		if cmd.ProcessState.Exited() {
-			return
-		}
+			if cmd.ProcessState.Exited() {
+				return
+			}
+		*/
 
 		pgid, err := syscall.Getpgid(cmd.Process.Pid)
 		if err == nil {
