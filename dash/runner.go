@@ -119,6 +119,16 @@ func (r *runner) RunE(ctx context.Context, splitResult *SplitResult,
 			//klog.ErrorS(err, "failed to kill process the usual way")
 
 		}()
+
+		go func() {
+			<-ctx.Done()
+			_ = cmd.Process.Kill()
+			// make sure hole process group is being killed
+			_ = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+			klog.V(5).InfoS("Killed process group",
+				"pid", cmd.Process.Pid,
+			)
+		}()
 	*/
 
 	defer func() {
