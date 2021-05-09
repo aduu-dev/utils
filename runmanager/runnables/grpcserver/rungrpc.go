@@ -3,6 +3,7 @@ package grpcserver
 import (
 	"fmt"
 	"net"
+	"time"
 
 	"google.golang.org/grpc"
 
@@ -25,12 +26,19 @@ func (s *Runnable) Run(m *runmanager.RunManager) {
 		return
 	}
 
+	address := lis.Addr()
+
 	s.GRPCServer = grpc.NewServer()
 	s.RegisterGRPCService(s.GRPCServer)
 
 	m.Run(&runmanager.Runner{
 		Run: func() error {
-			fmt.Println("Running grpc on", s.Endpoint)
+			fmt.Println("Running grpc on", address)
+
+			// Workaround: Print it later again so parent process can pick it up.
+			time.AfterFunc(time.Second*2, func() {
+				fmt.Println("Running grpc on", address)
+			})
 			return s.GRPCServer.Serve(lis)
 		},
 		Shutdown: func() error {

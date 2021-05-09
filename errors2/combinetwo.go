@@ -1,8 +1,6 @@
 package errors2
 
-import (
-	"golang.org/x/xerrors"
-)
+import "fmt"
 
 // CombineErrors combines errors if both are not nil, otherwise returns the non-nil one if one exists.
 func CombineErrors(primary error, secondary error) (err error) {
@@ -14,7 +12,7 @@ func CombineErrors(primary error, secondary error) (err error) {
 	case primary != nil && secondary == nil:
 		err = primary
 	case primary != nil && secondary != nil:
-		err = xerrors.Errorf("secondary failure %#v arose after primary failure: %w", secondary, primary)
+		err = fmt.Errorf("secondary failure %#v arose after primary failure: %w", secondary, primary)
 	}
 	return
 }

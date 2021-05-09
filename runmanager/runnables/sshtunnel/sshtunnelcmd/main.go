@@ -2,6 +2,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	"strings"
 
@@ -48,6 +49,7 @@ func RootCMD() *cobra.Command {
 		klog.InfoS("number of services", "service-count", len(services))
 
 		runmanager.RunServices(
+			context.Background(),
 			append(
 				[]runmanager.Service{
 					runmanager.RunInterruptHandler,

@@ -82,8 +82,8 @@ func RunInterruptHandler(m *RunManager) {
 type Service func(m *RunManager)
 
 // RunServices starts up all given services.
-func RunServices(services []Service) {
-	ctx, cancel := context.WithCancel(context.Background())
+func RunServices(ctx context.Context, services []Service) {
+	ctx, cancel := context.WithCancel(ctx)
 
 	const defaultErrorChannelSize = 100
 	errChan := make(chan error, defaultErrorChannelSize)
