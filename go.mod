@@ -9,11 +9,10 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/hashicorp/go-uuid v1.0.1
-	github.com/improbable-eng/grpc-web v0.12.0
+	github.com/improbable-eng/grpc-web v0.15.0
 	github.com/jmoiron/sqlx v1.2.1-0.20190826204134-d7d95172beb5
 	github.com/miekg/dns v1.1.29
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223 // indirect
 	github.com/otiai10/copy v1.1.1
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.7.0 // indirect
@@ -26,6 +25,7 @@ require (
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	google.golang.org/grpc v1.38.0
+	google.golang.org/protobuf v1.27.1 // indirect
 	gotest.tools v2.2.0+incompatible
 	k8s.io/klog/v2 v2.2.0
 )
