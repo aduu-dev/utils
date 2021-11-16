@@ -68,7 +68,10 @@ func (setup *ViperSetup) SetupFlags(
 	fs := flag.NewFlagSet("log", flag.ExitOnError)
 	klog.InitFlags(fs)
 
-	cmd.PersistentFlags().AddGoFlag(fs.Lookup("v"))
+	verboseFlag := fs.Lookup("v")
+	verboseFlag.Name = "vll" // Otherwise conflicts with completion.
+
+	cmd.PersistentFlags().AddGoFlag(verboseFlag)
 	cmd.PersistentFlags().AddGoFlag(fs.Lookup("logtostderr"))
 	cmd.PersistentFlags().AddGoFlag(fs.Lookup("log_file"))
 	cmd.PersistentFlags().AddGoFlag(fs.Lookup("log_dir"))
